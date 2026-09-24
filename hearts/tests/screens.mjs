@@ -5,7 +5,7 @@ const fixtures=createFixtures();
 const browser=await webkit.launch();const report=[];
 try{
  for(const language of ['en','es','vi'])for(const [width,height] of [[390,740],[375,667],[844,390]]){
-  for(const fixture of ['pass','received','receivedTop','hold','play','late','trick','handEnd','moon','tie','moonTie','moonWin','win','lose','liveMoonwatch','liveMoondanger','liveMooncomplete']){
+  for(const fixture of ['pass','received','receivedTop','hold','play','allPlayable','late','trick','handEnd','moon','tie','moonTie','moonWin','win','lose','liveMoonwatch','liveMoondanger','liveMooncomplete']){
    const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'});
    const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.addInitScript(({state,language,KEY})=>{

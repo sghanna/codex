@@ -56,6 +56,17 @@ for(const trick of complete.history){
  replay=E.collect(replay);
 }
 assert(fixtures.liveMoonwatch && fixtures.liveMoondanger && fixtures.liveMooncomplete && fixtures.moonYourTurn);
+// A real opponent move leaves eleven legal cards, including seven hearts.
+const deal=E.newGame(rng(1));
+let turn=E.begin(E.pass(deal,deal.hands.map((_,p)=>E.choosePass(E.viewFor(deal,p)))));
+while(turn.phase!=='hand-end'){
+ const before=turn;
+ turn=turn.phase==='play'?E.play(turn,turn.turn,E.choosePlay(E.viewFor(turn,turn.turn))):E.collect(turn);
+ if(before.phase==='play' && turn.phase==='play' && turn.turn===0 && turn.hands[0].length>=10 && E.legalCards(turn,0).length===turn.hands[0].length){
+  fixtures.beforeAllPlayable=before;fixtures.allPlayable=turn;break;
+ }
+}
+assert(fixtures.beforeAllPlayable && fixtures.allPlayable);
 assert(Object.values(fixtures).every(E.validate));
 return fixtures;
 }

@@ -37,7 +37,8 @@ try{
  const s=fixtures.play,page=await load(s),legal=E.legalCards(s,0);
  assert.deepEqual(await page.locator('#hand .playable').evaluateAll(cards=>cards.map(c=>c.dataset.card)),legal);
  assert.equal(await page.locator('#hand .unplayable').count(),s.hands[0].length-legal.length);
- assert((await page.locator('#instruction').textContent()).startsWith('Follow'));
+ assert.equal(await page.locator('#instruction').textContent(),'Your turn');
+ assert((await page.locator('#hand-note').textContent()).startsWith('Follow'));
  const off=s.hands[0].find(c=>!legal.includes(c));
  if(off){
   // Disabled cards remain tappable to explain the rule, but never change the move.

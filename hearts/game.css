@@ -40,12 +40,15 @@ h1 { font-size:28px; }
 .watch-icon { width:22px; height:22px; flex:0 0 22px; }
 .moon-meter { height:4px; background:#fff3cd33; border-radius:3px; margin-top:4px; overflow:hidden; }
 .moon-meter span { height:100%; display:block; background:#ffe5a3; border-radius:3px; }
-.hand-heading { height:29px; padding:0 2px 4px; }
+.hand-cue { padding:3px 8px; margin-bottom:5px; border-radius:9px; }
+.hand-heading { height:25px; padding:0; }
 .hand-heading h2 { font-size:21px; line-height:25px; }
 .legal-count { font-size:18px; line-height:22px; color:#ffdfa1; font-weight:750; white-space:nowrap; }
-.hand-note { min-height:22px; margin:0 2px 7px; color:#eee2c2; font-size:18px; line-height:22px; }
-.hand-area.is-your-turn .hand-heading h2 { color:#fff0aa; }
-.hand-area.is-your-turn .hand-note { color:#fff2cd; }
+.hand-note { min-height:22px; margin:0; color:#eee2c2; font-size:18px; line-height:22px; }
+/* Option F: blue felt marks the entire hand for as long as it is your turn. */
+.hand-area.is-your-turn { background:#12476a; border-radius:10px; box-shadow:0 0 0 3px #91d3ff; }
+.hand-area.is-your-turn .hand-cue { background:#12476a; }
+.hand-area.is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#fff; text-shadow:none; }
 :root:not([data-layout="current"]) .hand { height:calc(var(--card-height) * var(--row-count,3) - var(--row-gaps,2) * var(--hand-overlap)); gap:0; }
 :root:not([data-layout="current"]) .hand-row { position:relative; isolation:isolate; }
 :root:not([data-layout="current"]) .hand-row + .hand-row { margin-top:calc(-1 * var(--hand-overlap)); }
@@ -97,8 +100,6 @@ dialog { max-height:calc(100dvh - 24px); overflow-y:auto; }
   .header { grid-column:1 / -1; height:44px; margin:0; padding:0; }
   .table { grid-column:1; grid-row:2 / 4; margin:0; min-height:250px; }
   .hand-area { grid-column:2; grid-row:2; align-self:end; }
-  .hand-heading { height:29px; }
-  .hand-note { font-size:18px; margin-bottom:6px; }
   .action-area { grid-column:2; grid-row:3; padding-top:0; height:56px; }
   .result-screen { grid-column:1 / -1; grid-row:2 / 4; padding-top:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 1fr auto; gap:8px 28px; }
   .result-heading { grid-column:1; grid-row:1; }

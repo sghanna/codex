@@ -20,6 +20,7 @@
   const random = () => { const bytes = new Uint32Array(1); crypto.getRandomValues(bytes); return bytes[0] / 4294967296; };
   let game, selected = [], timer = null, saveProblem = false, recovery = '', audio = null, collection = null, watchMarkup = '';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+  let wasYourTurn = false, turnAnimation = null;
   const read = key => { try { const value = JSON.parse(localStorage.getItem(key)); return value?.version === 2 && E.validate(value.game) ? value : null; } catch { return null; } };
   const saved = read(KEY) || read(BACKUP);
   if (saved) {
@@ -281,12 +282,22 @@
   function renderGuidance() {
     const ownTurn = game.phase === 'play' && game.turn === 0;
     document.querySelector('.hand-area').classList.toggle('is-your-turn',ownTurn);
+    if (!ownTurn) { turnAnimation?.cancel(); turnAnimation = null; }
+    else if (!wasYourTurn && !reducedMotion.matches && Element.prototype.animate) {
+      turnAnimation = document.querySelector('.hand-area').animate([
+        {backgroundColor:'#173a2a',boxShadow:'0 0 0 0px #91d3ff'},
+        {backgroundColor:'#12476a',boxShadow:'0 0 0 3px #91d3ff'}
+      ],{duration:800,easing:'ease-out'});
+    }
+    wasYourTurn = ownTurn;
     $('legal-count').textContent = ownTurn ? t('playableCount',{n:E.legalCards(game,0).length}) : '';
     if (ownTurn) {
       const guide = I.guidance(game);
-      const title = {opening:'leadTwo',follow:'followSuit',free:'yourChoice',firstDiscard:'firstTrick',heartsLocked:'leadSuit'}[guide.reason];
-      $('instruction').textContent = t(title,{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
-      $('hand-note').textContent = selected.length ? t(guide.legal.length === 1 ? 'onlyCard' : 'confirmCard') : t(guide.reason === 'heartsLocked' ? 'heartsClosed' : guide.reason === 'firstDiscard' ? 'firstNoPoints' : 'brightCards');
+      const allPlayable = guide.legal.length === game.hands[0].length;
+      const hint = selected.length ? guide.legal.length === 1 ? 'onlyCard' : 'confirmCard'
+        : allPlayable ? 'chooseAny' : {opening:'leadTwo',follow:'followSuit',free:'brightCards',firstDiscard:'firstNoPoints',heartsLocked:'heartsClosed'}[guide.reason];
+      $('instruction').textContent = t('yourTurn');
+      $('hand-note').textContent = t(hint,{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
     } else {
       const note = game.phase === 'pass' ? 'passHint' : game.phase === 'received' ? game.passOffset ? 'receivedHint' : 'holdHint' : game.phase === 'trick-end' ? collection?.stage === 'done' ? 'readyWhenYouAre' : 'collectingHint' : 'yourTurnSoon';
       $('hand-note').textContent = t(note);
@@ -377,7 +388,11 @@
   window.addEventListener('pagehide',() => { stopTimer(); pauseCollection(); save(); });
   window.addEventListener('pageshow',schedule);
   window.addEventListener('resize',() => { renderPiles(); if (collection?.stage === 'moving') finishCollection(collection); });
-  reducedMotion.addEventListener('change',() => { if (reducedMotion.matches && collection?.stage === 'moving') finishCollection(collection); });
+  reducedMotion.addEventListener('change',() => {
+    if (!reducedMotion.matches) return;
+    turnAnimation?.cancel(); turnAnimation = null;
+    if (collection?.stage === 'moving') finishCollection(collection);
+  });
   window.addEventListener('storage',event => {
     if (event.key !== KEY || !event.newValue) return;
     const latest = read(KEY); if (!latest) return;
