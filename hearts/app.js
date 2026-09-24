@@ -18,7 +18,7 @@
   const esc = text => String(text).replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const check = '<span class="check" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="m3 9 4 4 8-8" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   const random = () => { const bytes = new Uint32Array(1); crypto.getRandomValues(bytes); return bytes[0] / 4294967296; };
-  let game, selected = [], timer = null, saveProblem = false, recovery = '', audio = null, collection = null;
+  let game, selected = [], timer = null, saveProblem = false, recovery = '', audio = null, collection = null, watchMarkup = '';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const read = key => { try { const value = JSON.parse(localStorage.getItem(key)); return value?.version === 2 && E.validate(value.game) ? value : null; } catch { return null; } };
   const saved = read(KEY) || read(BACKUP);
@@ -120,7 +120,7 @@
       html = `<div class="watch-title">${esc(t('handProgress',{n:Math.min(13,game.history.length+1),points:summary.remaining}))}</div><div class="watch-detail">${esc(summary.moon === 'blocked' ? t('moonBlocked') : t(game.heartsBroken ? 'heartsOpen' : 'heartsClosed'))}</div>`;
     }
     // A live region changes only when its information changes, not on card selection.
-    if (watch.innerHTML !== html) watch.innerHTML = html;
+    if (watchMarkup !== html) { watch.innerHTML = html; watchMarkup = html; }
   }
 
   function clearCollection() {

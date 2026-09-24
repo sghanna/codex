@@ -29,6 +29,11 @@ try{
   }
   await page.close();
  }
+ const moonTurn=await load(fixtures.moonYourTurn);
+ await moonTurn.evaluate(()=>{window.watchMutations=0;new MutationObserver(records=>window.watchMutations+=records.length).observe(document.getElementById('hand-watch'),{childList:true,subtree:true,characterData:true});});
+ await moonTurn.locator('#hand .playable').first().click({position:{x:20,y:20}});
+ assert.equal(await moonTurn.evaluate(()=>window.watchMutations),0,'Selecting a card must not reannounce the SVG moon banner');
+ await moonTurn.close();
  const s=fixtures.play,page=await load(s),legal=E.legalCards(s,0);
  assert.deepEqual(await page.locator('#hand .playable').evaluateAll(cards=>cards.map(c=>c.dataset.card)),legal);
  assert.equal(await page.locator('#hand .unplayable').count(),s.hands[0].length-legal.length);

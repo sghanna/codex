@@ -51,10 +51,11 @@ for(const trick of complete.history){
   replay=E.play(replay,play.player,play.card);
   const moon=I.summarize(replay).moon;
   if(['watch','danger','complete'].includes(moon))fixtures['liveMoon'+moon] ||= clone(replay);
+  if(['watch','danger'].includes(moon) && replay.phase==='play' && replay.turn===0)fixtures.moonYourTurn ||= clone(replay);
  }
  replay=E.collect(replay);
 }
-assert(fixtures.liveMoonwatch && fixtures.liveMoondanger && fixtures.liveMooncomplete);
+assert(fixtures.liveMoonwatch && fixtures.liveMoondanger && fixtures.liveMooncomplete && fixtures.moonYourTurn);
 assert(Object.values(fixtures).every(E.validate));
 return fixtures;
 }

@@ -64,4 +64,4 @@ These checks use desktop WebKit and Chrome. The release still needs a physical i
 
 Publish this version at `https://sghanna.github.io/codex/hearts/`. Keep its cache and storage names separate from other game versions.
 
-Current cache version: `codex-hearts-v6`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.
+Current cache version: `codex-hearts-v7`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.
