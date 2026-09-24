@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "handNumber": 1,
+  "scores": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "passOffset": 1,
+  "phase": "received",
+  "hands": [
+    [
+      "2C",
+      "4C",
+      "6C",
+      "8C",
+      "10C",
+      "JC",
+      "QC",
+      "3S",
+      "6S",
+      "7S",
+      "JS",
+      "2H",
+      "4H"
+    ],
+    [
+      "7C",
+      "7D",
+      "10D",
+      "JD",
+      "QD",
+      "KD",
+      "4S",
+      "5S",
+      "8S",
+      "3H",
+      "6H",
+      "10H",
+      "JH"
+    ],
+    [
+      "3C",
+      "9C",
+      "KC",
+      "2D",
+      "4D",
+      "5D",
+      "9D",
+      "AD",
+      "9S",
+      "AS",
+      "5H",
+      "8H",
+      "AH"
+    ],
+    [
+      "5C",
+      "AC",
+      "3D",
+      "6D",
+      "8D",
+      "2S",
+      "10S",
+      "QS",
+      "KS",
+      "7H",
+      "9H",
+      "QH",
+      "KH"
+    ]
+  ],
+  "received": [
+    "QC",
+    "2C",
+    "4C"
+  ],
+  "trick": [],
+  "history": [],
+  "handPoints": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "heartsBroken": false,
+  "turn": null,
+  "result": null
+}
