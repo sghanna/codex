@@ -1,0 +1,32 @@
+/* These styles belong only to the six-option review. */
+:root { --turn-gold:#ffe2a0; --turn-blue:#bce8ff; }
+.hand-area { position:relative; }
+.hand-area.is-your-turn .hand-cue { background:transparent; box-shadow:none; }
+.hand-area.is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#fff7df; }
+
+/* A: the original warm banner. */
+[data-option="A"] .is-your-turn .hand-cue { background:var(--turn-gold); box-shadow:0 0 0 1px var(--turn-gold); }
+[data-option="A"] .is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#24180d; }
+
+/* B: cool blue separates this cue from the gold scoring accents. */
+[data-option="B"] .is-your-turn .hand-cue { background:var(--turn-blue); box-shadow:0 0 0 1px var(--turn-blue); }
+[data-option="B"] .is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#10283b; }
+
+/* C: a still, bright surface with no entrance animation. */
+[data-option="C"] .is-your-turn .hand-cue { background:#fff7df; box-shadow:0 0 0 1px #fff7df; }
+[data-option="C"] .is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#18251d; }
+
+/* D: a frame surrounds the hand without changing individual cards. */
+[data-option="D"] .is-your-turn { border-radius:10px; box-shadow:0 0 0 3px var(--turn-gold); }
+[data-option="D"] .is-your-turn .hand-cue h2 { color:var(--turn-gold); }
+
+/* E: attention starts at the player's score tile. */
+[data-option="E"] .you-score.is-turn { background:var(--turn-gold); border-color:var(--turn-gold); box-shadow:0 0 0 1px var(--turn-gold); }
+[data-option="E"] .you-score.is-turn,
+[data-option="E"] .you-score.is-turn :is(.seat-name,.seat-hand,.seat-total,strong) { color:#24180d; text-shadow:none; }
+[data-option="E"] .is-your-turn .hand-cue h2 { color:var(--turn-gold); }
+
+/* F: the felt behind the whole hand becomes blue. */
+[data-option="F"] .is-your-turn { background:#12476a; border-radius:10px; box-shadow:0 0 0 3px #91d3ff; }
+[data-option="F"] .is-your-turn .hand-cue { background:#12476a; }
+[data-option="F"] .is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#fff; }
