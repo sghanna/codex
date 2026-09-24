@@ -14,22 +14,22 @@
 <main class="review">
   <header class="review-heading">
     <a href="../../hearts/">Back to Hearts</a>
-    <p class="eyebrow">Codex Hearts · 20% overlay selected</p>
+    <p class="eyebrow">Codex Hearts · B, Crimson selected</p>
     <h1>Three darker reds.</h1>
     <p>Each option shows the same hearts and diamonds at full brightness and beneath your chosen 20% black overlay. The black spade stays unchanged as a reference.</p>
-    <p class="current-reference"><span class="ink-swatch current-swatch" aria-hidden="true"></span>Current red: <code>#C62F27</code> · 4.00:1 with the overlay.</p>
+    <p class="current-reference"><span class="ink-swatch current-swatch" aria-hidden="true"></span>Previous red: <code>#C62F27</code> · 4.00:1 with the overlay.</p>
     <div class="review-controls"><label>View <select id="view"><option value="pairs">Full cards · bright and shaded</option><option value="hand">Mixed hand · overlapping rows</option></select></label><a href="../card-opacity/">Review the opacity comparison</a></div>
   </header>
   <section class="options" id="options" aria-label="Three darker red options"></section>
   <p class="sr-only" id="review-status" role="status" aria-live="polite"></p>
   <section class="contrast-notes" aria-labelledby="recommendation">
-    <h2 id="recommendation">My recommendation: B, Crimson.</h2>
-    <p>It gives the red cards more contrast while keeping a clear red appearance beside black suits. A is closest to the current color. C has the most contrast, but looks nearer to black when shaded.</p>
+    <h2 id="recommendation">Selected: B, Crimson.</h2>
+    <p>It gives the red cards more contrast while keeping a clear red appearance beside black suits. A is closest to the previous color. C has the most contrast, but looks nearer to black when shaded.</p>
     <p>All three exceed 4.5:1 against the darkest part of the card face, even with the 20% overlay. That is the WCAG AA contrast target for ordinary text and the AAA target for large text. These color measurements do not certify the whole game. <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">Minimum contrast</a> · <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html">Enhanced contrast</a></p>
-    <p class="method">Ratios use this deck’s darkest paper color (#ebebe5), with the black overlay composited over both paper and ink before calculating relative luminance. Lighter portions of the card have higher contrast. The game now uses 20% shading; the red ink remains unchanged while you compare these options.</p>
+    <p class="method">Ratios use this deck’s darkest paper color (#ebebe5), with the black overlay composited over both paper and ink before calculating relative luminance. Lighter portions of the card have higher contrast. The game now uses B, Crimson, with 20% shading. The opacity comparison uses this selected ink.</p>
   </section>
 </main>
-<script src="../../hearts/deck.js"></script>
+<script src="../../hearts/deck.js?v=crimson-1"></script>
 <script src="review.js"></script>
 </body>
 </html>
