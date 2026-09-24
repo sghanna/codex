@@ -52,9 +52,10 @@ h1 { font-size:28px; }
 :root:not([data-layout="current"]) .hand-row:nth-child(1) { z-index:1; }
 :root:not([data-layout="current"]) .hand-row:nth-child(2) { z-index:2; }
 :root:not([data-layout="current"]) .hand-row:nth-child(3) { z-index:3; }
-.card.playable { outline:3px solid #ffe59a; outline-offset:1px; transform:translateY(-2px); box-shadow:0 0 0 2px #14271b,0 4px 4px #0006; }
-.card.unplayable { background:#84948a; outline:1px solid #729180; cursor:not-allowed; }
-.card.unplayable > svg { filter:grayscale(1); opacity:.65; }
+.card.unplayable { cursor:not-allowed; }
+.card.unplayable > svg { filter:none; opacity:1; }
+/* Preserve full-color card artwork beneath the chosen 20% black overlay. */
+.card.unplayable::after { content:""; position:absolute; inset:0; border-radius:inherit; background:#000; opacity:.2; pointer-events:none; box-shadow:none; }
 .card[aria-pressed="true"] { outline:4px solid #ff00ff; transform:translateY(-5px); box-shadow:0 0 12px 3px #ff00ff66,0 5px 5px #0006; }
 .card.received::after { content:attr(data-new); inset:auto -5px -5px auto; width:auto; height:19px; min-width:32px; padding:0 3px; }
 :root:not([data-layout="current"]) .hand-row:not(:last-child) .card[aria-pressed="true"] .check { top:calc(var(--row-step) - 20px); bottom:auto; width:18px; height:18px; }

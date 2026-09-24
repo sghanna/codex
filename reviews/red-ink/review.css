@@ -1,0 +1,19 @@
+.current-reference { display:flex; flex-wrap:wrap; align-items:center; gap:8px; color:#e6ddc4; }
+.ink-swatch { display:inline-block; width:24px; height:24px; flex:0 0 24px; border-radius:50%; border:1px solid #f3dba8; background:var(--ink); }
+.current-swatch { --ink:#c62f27; }
+.option-heading h2 { gap:9px; font-size:25px; }
+.option-heading p { min-height:48px; }
+.ink-value { display:flex; align-items:center; gap:8px; margin-top:10px; font-size:17px; color:#efe4c5; }
+.pair-samples { position:relative; padding:14px 12px 20px; background:radial-gradient(ellipse at 50% 20%,#244b36 0,#173a2a 32%,#0b251b 85%); }
+.ink-state { margin:0 0 10px!important; font-size:18px!important; color:#fff3d2; font-weight:650; }
+.ink-cards { display:flex; justify-content:center; gap:12px; margin:0 0 20px; --card-width:68.4px; --card-height:102.6px; }
+.ink-cards:last-child { margin-bottom:0; }
+.ink-cards .card { flex:none; cursor:default; }
+.ink-cards .shaded::after { content:""; position:absolute; inset:0; background:#000; opacity:.2; border-radius:inherit; pointer-events:none; }
+.ink-cards svg { opacity:1; filter:none; }
+.ink-metrics { display:grid; gap:3px; }
+.ink-metrics div { display:flex; justify-content:space-between; gap:12px; }
+.sample-hand-view { display:none; }
+.review.show-hand .pair-samples { display:none; }
+.review.show-hand .sample-hand-view { display:block; }
+.review.show-hand .sample-status { min-height:69px; }

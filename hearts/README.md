@@ -4,9 +4,9 @@ A complete, ad-free Hearts game for one person and three computer opponents. Ope
 
 ## Playing
 
-Choose three cards and confirm the pass. Review the three received cards, then continue. On your turn, select a highlighted legal card and press **Play card**. After the fourth card, the winner is highlighted. The cards briefly stay face up, then gather and slide into that player’s pile. Press **Next trick** when ready to continue; the final trick offers **See scores**.
+Choose three cards and confirm the pass. Review the three received cards, then continue. On your turn, select an unshaded legal card and press **Play card**. After the fourth card, the winner is highlighted. The cards briefly stay face up, then gather and slide into that player’s pile. Press **Next trick** when ready to continue; the final trick offers **See scores**.
 
-On your turn, legal cards stay bright with a thick gold outline. Other cards are gray, with readable ranks and suits. The heading explains which suit to follow and counts legal choices. Tapping a gray card explains the rule. A sole legal card is selected automatically; you still press **Play card** to confirm it. Passing and waiting keep all cards readable.
+On your turn, unplayable cards receive a 20% black overlay over their full-color faces. Legal cards retain their ordinary appearance; selection still uses magenta. The heading explains which suit to follow and counts legal choices. Tapping a shaded card explains the rule. A sole legal card is selected automatically; you still press **Play card** to confirm it. Passing and waiting keep all cards readable.
 
 Four aligned player columns keep points taken this hand and match totals visible above the corresponding played cards. A moon watch names the only player who has taken points once they collect four hearts; it becomes an alert at eight hearts or 20 points. It shows hearts out of 13, queen ownership, and points out of 26. If points split between players, the watch clears. Pending complete tricks count immediately without changing the match total until the hand ends.
 
@@ -64,4 +64,4 @@ These checks use desktop WebKit and Chrome. The release still needs a physical i
 
 Publish this version at `https://sghanna.github.io/codex/hearts/`. Keep its cache and storage names separate from other game versions.
 
-Current cache version: `codex-hearts-v7`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.
+Current cache version: `codex-hearts-v8`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.
