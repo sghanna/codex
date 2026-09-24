@@ -7,14 +7,14 @@
   <title>Hearts · Crimson opacity comparison</title>
   <link rel="stylesheet" href="../../hearts/style.css">
   <link rel="stylesheet" href="../../hearts/game.css">
-  <link rel="stylesheet" href="review.css">
+  <link rel="stylesheet" href="review.css?v=crimson-30">
 </head>
 <body>
 <main class="review">
   <header class="review-heading">
     <a href="../../hearts/">Back to Hearts</a>
     <p class="eyebrow">Codex Hearts · Card visibility</p>
-    <p><strong>B · Crimson <code>#961C18</code> is selected.</strong> The game currently uses 20% shading. All six samples below use the new red.</p>
+    <p><strong>B · Crimson <code>#961C18</code> is selected.</strong> The game now uses 30% shading. All six samples below use the new red.</p>
     <h1>Compare shading with Crimson.</h1>
     <p>Six black overlays, from 20% to 70%. The card artwork underneath stays at full opacity and retains its red and black suits. Playable cards have their ordinary appearance.</p>
     <p class="try-note">The same hand appears in every option. Follow clubs: 3♣, 7♣, 10♣, and Q♣ can be selected. Tap a club to compare the magenta selection. These samples do not change your saved game.</p>
@@ -24,8 +24,8 @@
   <p class="sr-only" id="review-status" role="status" aria-live="polite"></p>
   <section class="contrast-notes" id="contrast-notes" aria-labelledby="contrast-title">
     <p class="eyebrow">Recommendation</p>
-    <h2 id="contrast-title">Compare 30% and 40%.</h2>
-    <p>The darker Crimson gives us more room for shading. I would try 30% first: red ink retains 4.95:1 contrast. At 40%, the cards are more clearly shaded and red contrast is 4.15:1. At 50%, red is down to 3.35:1; 60–70% falls below 3:1. These are design tradeoffs, not WCAG-approved opacity levels.</p>
+    <h2 id="contrast-title">Selected: 30%.</h2>
+    <p>The darker Crimson gives us more room for shading. Your selected 30% overlay keeps red ink at 4.95:1 contrast. At 40%, the cards are more clearly shaded and red contrast is 4.15:1. At 50%, red is down to 3.35:1; 60–70% falls below 3:1. These are design tradeoffs, not WCAG-approved opacity levels.</p>
     <div class="table-wrap"><table><caption>Calculated contrast within the shaded card</caption><thead><tr><th scope="col">Black overlay</th><th scope="col">Red ink</th><th scope="col">Black ink</th><th scope="col">Reading tradeoff</th></tr></thead><tbody id="contrast-rows"></tbody></table></div>
     <p class="method">Conservative calculations using the selected Crimson (#961c18), black (#1b0a0a), and darkest card-face color (#ebebe5). The black overlay is composited over both the ink and the paper before calculating WCAG relative luminance. Ratios are rounded for display; the lighter parts of the card have higher contrast. These figures assess ink against paper, not the difference between playable and unplayable cards, and are not a complete accessibility audit.</p>
     <h3>What WCAG says</h3>
@@ -39,7 +39,7 @@
     <p>Compare at Mom’s usual screen brightness and reading distance. In particular, check whether she can still distinguish the shaded Q, J, 10, hearts, and diamonds comfortably.</p>
   </section>
 </main>
-<script src="../../hearts/deck.js?v=crimson-1"></script>
-<script src="review.js?v=crimson-1"></script>
+<script src="../../hearts/deck.js?v=crimson-30"></script>
+<script src="review.js?v=crimson-30"></script>
 </body>
 </html>

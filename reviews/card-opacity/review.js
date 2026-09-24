@@ -8,8 +8,8 @@
   const ranks = {J:'jack',Q:'queen',K:'king',A:'ace'};
   const name = card => `${ranks[card.slice(0,-1)] || card.slice(0,-1)} of ${suits[card.slice(-1)]}`;
   const opinions = {
-    20:['Current game setting','Most reading contrast'],
-    30:['Stronger shading, good contrast','My first stronger option'],
+    20:['Lighter shading','More reading contrast'],
+    30:['Current game setting','Selected: Crimson with 30% shading'],
     40:['More separation','Less reading margin than 30%'],
     50:['Heavy shading','Red is getting close to 3:1'],
     60:['Red suits lose clarity','Red falls below 3:1'],
