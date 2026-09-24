@@ -1,5 +1,7 @@
 # Received-card review options
 
+**Selected: C + E.** The main game combines the arrival animation with 30% shading on the original cards. Received-card outlines and NEW badges are removed.
+
 Six isolated, playable previews of a validated pass from Barbara: 2♣, 4♣, Q♣. The cards land in overlapped rows, exposing the weakness of the existing small NEW labels.
 
 A groups them in a labeled tray; B puts them in their own first row; C shades the ten original cards; D pauses on three larger cards; E animates their arrival; F requires acknowledging each card. The normal game is unchanged until an option is selected.

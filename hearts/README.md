@@ -4,7 +4,7 @@ A complete, ad-free Hearts game for one person and three computer opponents. Ope
 
 ## Playing
 
-Choose three cards and confirm the pass. Review the three received cards, then continue. On your turn, select an unshaded legal card and press **Play card**. After the fourth card, the winner is highlighted. The cards briefly stay face up, then gather and slide into that player’s pile. Press **Next trick** when ready to continue; the final trick offers **See scores**.
+Choose three cards and confirm the pass. Watch the three received cards move into your hand, then press **Start playing** when ready. On your turn, select an unshaded legal card and press **Play card**. After the fourth card, the winner is highlighted. The cards briefly stay face up, then gather and slide into that player’s pile. Press **Next trick** when ready to continue; the final trick offers **See scores**.
 
 On your turn, unplayable cards receive a 30% black overlay over their full-color faces. Legal cards retain their ordinary appearance; selection still uses magenta. Red ranks and suits use B, Crimson (#961c18). The heading says **Your turn**, counts legal choices, and explains which suit to follow. When every card is legal, it says **Choose any card**. The felt behind the whole hand turns blue (#12476a) with a light blue border (#91d3ff), using option F from the turn-cue review. The 800 ms entrance runs once per turn; the blue stays until you play. Reduced Motion shows the blue immediately without animation. Tapping a shaded card explains the rule. A sole legal card is selected automatically; you still press **Play card** to confirm it. Passing and waiting keep all cards readable.
 
@@ -34,7 +34,7 @@ The opponents use only their own hands and public play history. Their strategy i
 
 The new save format uses `codex-hearts-game-v2`, with the preceding valid save in `codex-hearts-game-v2-backup`. Restoration checks all 52 cards and replays the hand to reject impossible states. Invalid saves fall back to the backup; otherwise a new game starts. The earlier Hearts implementation's save is left untouched and is not imported. Preferences use `codex-hearts-settings-v2`. Storage failure is reported in Menu.
 
-Opponent timers and trick animations pause while a dialog is open or the page is hidden. The next trick never starts automatically. Reduced Motion skips the traveling cards; the winner highlight and pile remain. Reloading during an animation restores the completed trick without scoring it twice. At short heights, hand rows overlap while played cards retain the same dimensions as hand cards. Ranks and corner suits stay visible. A received card's text badge is omitted in deeply overlapping rows so it cannot cover a rank; the gold outline and the received-card display remain.
+Opponent timers and trick animations pause while a dialog is open or the page is hidden. The next trick never starts automatically. Reduced Motion skips the traveling cards; the winner highlight and pile remain. Reloading during an animation restores the completed trick without scoring it twice. At short heights, hand rows overlap while played cards retain the same dimensions as hand cards. Ranks and corner suits stay visible. During the received-card review, the ten original cards have a 30% black overlay. The three new cards remain bright with no colored outline or NEW badge. They travel into their sorted positions one at a time, and the shading remains until **Start playing**. Menu and hidden-page states pause their arrival; rotation finishes it safely, and starting early cancels the remaining movement. Reduced Motion uses a static three-card review. The animation never changes the saved cards or scores.
 
 ## Development and validation
 
@@ -64,4 +64,4 @@ These checks use desktop WebKit and Chrome. The release still needs a physical i
 
 Publish this version at `https://sghanna.github.io/codex/hearts/`. Keep its cache and storage names separate from other game versions.
 
-Current cache version: `codex-hearts-v12`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.
+Current cache version: `codex-hearts-v14`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.

@@ -61,9 +61,6 @@ h2 { font-size: 22px; line-height: 1.15; margin: 0; font-weight: 750; letter-spa
 .card[aria-pressed="true"] .check { display: grid; place-items: center; position: absolute; right: -5px; bottom: -5px; width: 24px; height: 24px; border: 2px solid white; border-radius: 50%; background: #a800a8; box-shadow: 0 1px 4px #0006; }
 .check svg { width: 15px; height: 15px; }
 .card.unavailable { background: #f6f5eb; }
-.card.unavailable::after { content: ""; position: absolute; inset: 0; border-radius: inherit; box-shadow: inset 0 -5px 0 #09231777; pointer-events: none; }
-.card.received { outline: 3px solid #f2d995; outline-offset: 1px; }
-.card.received::after { content: "NEW"; position: absolute; bottom: -5px; right: -5px; width: 32px; border: 1px solid #f2d995; border-radius: 5px; background: #1b4932; color: white; font-size: 10px; line-height: 17px; font-weight: 850; letter-spacing: .2px; }
 .card.empty-card { visibility: hidden; }
 .action-area { display: grid; grid-template-columns: 48px 1fr; gap: 12px; height: 72px; padding-top: 14px; flex: 0 0 72px; }
 .help-button { align-self: center; width: 46px; height: 46px; padding: 0; border-radius: 50%; border: 2px solid #d8b66d; background: #0b2019; color: var(--cream); font: bold 26px Georgia, serif; box-shadow: 0 3px 7px #0004; }
@@ -114,10 +111,6 @@ dialog p { margin: 18px 0; }
   :root:not([data-layout="current"]) .hand-row:nth-child(3) { z-index: 3; }
   :root:not([data-layout="current"]) .hand-row:not(:last-child) .card[aria-pressed="true"] .check {
     top: calc(var(--row-step) - 28px);
-    bottom: auto;
-  }
-  :root:not([data-layout="current"]) .hand-row:not(:last-child) .card.received::after {
-    top: calc(var(--row-step) - 22px);
     bottom: auto;
   }
 }

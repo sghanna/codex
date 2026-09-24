@@ -56,14 +56,21 @@ h1 { font-size:28px; }
 :root:not([data-layout="current"]) .hand-row:nth-child(2) { z-index:2; }
 :root:not([data-layout="current"]) .hand-row:nth-child(3) { z-index:3; }
 .card.unplayable { cursor:not-allowed; }
-.card.unplayable > svg { filter:none; opacity:1; }
+.card.unplayable > svg, .card.prior-card > svg { filter:none; opacity:1; }
 /* Preserve full-color card artwork beneath the chosen 30% black overlay. */
-.card.unplayable::after { content:""; position:absolute; inset:0; border-radius:inherit; background:#000; opacity:.3; pointer-events:none; box-shadow:none; }
+.card.unplayable::after, .card.prior-card::after { content:""; position:absolute; inset:0; border-radius:inherit; background:#000; opacity:.3; pointer-events:none; box-shadow:none; }
 .card[aria-pressed="true"] { outline:4px solid #ff00ff; transform:translateY(-5px); box-shadow:0 0 12px 3px #ff00ff66,0 5px 5px #0006; }
-.card.received::after { content:attr(data-new); inset:auto -5px -5px auto; width:auto; height:19px; min-width:32px; padding:0 3px; }
+.card.received::after { display:none; }
+.card.receipt-pending { visibility:hidden; }
+.reviewing-received .table-status { order:-1; min-height:24px; line-height:22px; padding:0; }
+.reviewing-received .pass-slot::after { display:none; }
+.receipt-summary { display:flex; flex-direction:column; align-items:center; gap:8px; font-size:23px; font-weight:750; }
+.receipt-summary strong { font-size:30px; word-spacing:15px; }
+.receipt-flight { position:fixed; inset:0; pointer-events:none; z-index:10; }
+.receipt-flight-card { position:absolute; border-radius:6px; box-shadow:0 4px 4px #0005; }
+.receipt-flight-card svg { display:block; width:100%; height:100%; }
 :root:not([data-layout="current"]) .hand-row:not(:last-child) .card[aria-pressed="true"] .check { top:calc(var(--row-step) - 20px); bottom:auto; width:18px; height:18px; }
 :root:not([data-layout="current"]) .hand-row:not(:last-child) .check svg { width:12px; height:12px; }
-:root:not([data-layout="current"]) .hand-row:not(:last-child) .card.received::after { display:none; }
 .action-area { height:64px; flex-basis:64px; padding-top:8px; }
 .primary-action { gap:7px; font-size:21px; }
 .primary-action .action-detail { padding-left:7px; font-size:18px; }

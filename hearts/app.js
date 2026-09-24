@@ -18,7 +18,7 @@
   const esc = text => String(text).replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const check = '<span class="check" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="m3 9 4 4 8-8" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   const random = () => { const bytes = new Uint32Array(1); crypto.getRandomValues(bytes); return bytes[0] / 4294967296; };
-  let game, selected = [], timer = null, saveProblem = false, recovery = '', audio = null, collection = null, watchMarkup = '';
+  let game, selected = [], timer = null, saveProblem = false, recovery = '', audio = null, collection = null, receipt = null, watchMarkup = '';
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let wasYourTurn = false, turnAnimation = null;
   const read = key => { try { const value = JSON.parse(localStorage.getItem(key)); return value?.version === 2 && E.validate(value.game) ? value : null; } catch { return null; } };
@@ -48,8 +48,8 @@
   function stopTimer() { clearTimeout(timer); timer = null; }
   function schedule() {
     stopTimer();
-    if (document.hidden || document.querySelector('dialog[open]')) { pauseCollection(); return; }
-    resumeCollection();
+    if (document.hidden || document.querySelector('dialog[open]')) { pauseCollection(); pauseReceipt(); return; }
+    resumeCollection(); resumeReceipt();
     if (game.phase !== 'play' || game.turn === 0) return;
     timer = setTimeout(() => {
       timer = null;
@@ -95,6 +95,74 @@
     document.querySelectorAll('#hand .card').forEach((card,index) => card.animate([
       {opacity:0,translate:'0 8px'}, {opacity:1,translate:'0 0'}
     ],{duration:220,delay:index * 16,fill:'backwards',easing:'ease-out'}));
+  }
+  function clearReceipt() {
+    const previous = receipt;
+    receipt = null;
+    if (previous) {
+      clearTimeout(previous.timer);
+      previous.animations.forEach(animation => animation.cancel());
+      previous.layer?.remove();
+      previous.sources.forEach(card => card.style.visibility = '');
+    }
+    $('hand').querySelectorAll('.receipt-pending').forEach(card => card.classList.remove('receipt-pending'));
+    delete document.querySelector('.table').dataset.receipt;
+  }
+  function renderReceiptSummary() {
+    $('center-cards').innerHTML = `<div class="receipt-summary" aria-hidden="true"><span>${esc(t('cardsAdded'))}</span><strong>${E.sort(game.received).map(code => esc(code.replace(/C$/,'♣').replace(/D$/,'♦').replace(/S$/,'♠').replace(/H$/,'♥'))).join(' ')}</strong></div>`;
+  }
+  function pauseReceipt() {
+    if (!receipt) return;
+    clearTimeout(receipt.timer); receipt.timer = null;
+    receipt.animations.forEach(animation => { if (animation.playState === 'running') animation.pause(); });
+  }
+  function finishReceipt(current) {
+    if (receipt !== current || game !== current.state || current.stage === 'done') return;
+    clearTimeout(current.timer); current.timer = null;
+    current.stage = 'done'; current.arrived = true;
+    current.animations.forEach(animation => animation.cancel());
+    current.layer?.remove();
+    $('hand').querySelectorAll('.receipt-pending').forEach(card => card.classList.remove('receipt-pending'));
+    document.querySelector('.table').dataset.receipt = 'done';
+    renderReceiptSummary(); renderAction();
+    announce(t('cardsAdded') + ': ' + game.received.map(cardName).join(', ') + '. ' + t('receivedHint'));
+  }
+  function flyReceipt(current) {
+    if (receipt !== current || game !== current.state || document.hidden || document.querySelector('dialog[open]')) return;
+    current.timer = null;
+    if (reducedMotion.matches || !Element.prototype.animate) { finishReceipt(current); return; }
+    current.sources = [...$('center-cards').querySelectorAll('.pass-slot')];
+    const targets = game.received.map(code => $('hand').querySelector(`[data-card="${code}"]`));
+    const layer = document.createElement('div');
+    layer.className = 'receipt-flight'; layer.setAttribute('aria-hidden','true');
+    document.body.append(layer);
+    current.layer = layer; current.stage = 'moving';
+    document.querySelector('.table').dataset.receipt = 'moving';
+    current.sources.forEach((source,index) => {
+      const from = source.getBoundingClientRect(), to = targets[index].getBoundingClientRect();
+      const flight = document.createElement('div');
+      flight.className = 'receipt-flight-card';
+      flight.style.cssText = `left:${from.left}px;top:${from.top}px;width:${from.width}px;height:${from.height}px`;
+      flight.innerHTML = source.innerHTML;
+      layer.append(flight); source.style.visibility = 'hidden';
+      const animation = flight.animate([
+        {transform:'translate(0,0)'}, {transform:`translate(${to.left - from.left}px,${to.top - from.top}px)`}
+      ],{duration:900,delay:index * 180,easing:'ease-in-out',fill:'forwards'});
+      current.animations.push(animation);
+      animation.finished.then(() => {
+        if (receipt !== current || game !== current.state) return;
+        targets[index].classList.remove('receipt-pending'); flight.remove();
+      }).catch(() => {});
+    });
+    Promise.allSettled(current.animations.map(animation => animation.finished)).then(() => finishReceipt(current));
+  }
+  function resumeReceipt() {
+    if (!receipt || receipt.stage === 'done') return;
+    if (receipt.stage === 'moving') receipt.animations.forEach(animation => { if (animation.playState === 'paused') animation.play(); });
+    else if (!receipt.timer) {
+      const current = receipt;
+      current.timer = setTimeout(() => flyReceipt(current),650);
+    }
   }
   function renderScores() {
     const summary = I.summarize(game);
@@ -224,7 +292,10 @@
       const playable = game.phase === 'play' && legal.includes(code);
       const unavailable = game.phase !== 'pass' && !playable;
       const unplayable = game.phase === 'play' && game.turn === 0 && !playable;
-      return `<button type="button" class="card ${playable ? 'playable' : ''} ${unavailable ? 'unavailable' : ''} ${unplayable ? 'unplayable' : ''} ${game.received.includes(code) ? 'received' : ''}" data-card="${code}" data-new="${esc(t('newLabel'))}" aria-label="${esc(cardName(code))}" aria-pressed="${selected.includes(code)}"${unavailable ? ' aria-disabled="true"' : ''}>${face(code)}${check}</button>`;
+      const received = game.received.includes(code);
+      const prior = game.phase === 'received' && game.received.length === 3 && !received;
+      const pending = received && receipt?.stage !== 'done';
+      return `<button type="button" class="card ${playable ? 'playable' : ''} ${unavailable ? 'unavailable' : ''} ${unplayable ? 'unplayable' : ''} ${received ? 'received' : ''} ${prior ? 'prior-card' : ''} ${pending ? 'receipt-pending' : ''}" data-card="${code}" aria-label="${esc(received ? t('newCardName',{card:cardName(code)}) : cardName(code))}" aria-pressed="${selected.includes(code)}"${unavailable ? ' aria-disabled="true"' : ''}>${face(code)}${check}</button>`;
     }).join('')}</div>`).join('');
     $('hand').querySelectorAll('.card').forEach(button => button.addEventListener('click',() => selectCard(button.dataset.card)));
     $('hand').querySelectorAll('.card-svg').forEach(svg => svg.setAttribute('aria-hidden','true'));
@@ -233,11 +304,13 @@
   function renderTable() {
     const passing = game.phase === 'pass' || game.phase === 'received';
     document.querySelector('.table').classList.toggle('play',!passing);
+    document.querySelector('.table').classList.toggle('reviewing-received',Boolean(receipt));
     if (passing) {
       const cards = game.phase === 'received' ? game.received : selected;
       $('center-cards').innerHTML = game.passOffset ? Array.from({length:3},(_,i) => `<div class="pass-slot ${cards[i] ? 'filled' : ''}">${cards[i] ? face(cards[i]) : i+1}</div>`).join('') : '';
-      $('center-cards').setAttribute('aria-label',cards.map(cardName).join(', '));
-      $('table-status').textContent = !game.passOffset ? t('hold') : game.phase === 'received' ? t('receivedFrom',{name:names()[(4-game.passOffset)%4]}) : t('passTo',{direction:t(passDirection(game.passOffset)),name:names()[game.passOffset]});
+      $('center-cards').setAttribute('aria-label',(receipt ? t('receivedFrom',{name:names()[(4-game.passOffset)%4]}) + ': ' : '') + cards.map(cardName).join(', '));
+      $('table-status').textContent = !game.passOffset ? t('hold') : game.phase === 'received' ? t('passedYou',{name:names()[(4-game.passOffset)%4]}) : t('passTo',{direction:t(passDirection(game.passOffset)),name:names()[game.passOffset]});
+      if (receipt?.arrived) renderReceiptSummary();
     } else {
       $('center-cards').innerHTML = [1,2,3,0].map(player => {
         const play = game.trick.find(play => play.player === player);
@@ -265,7 +338,7 @@
       $('action-label').textContent = t(actionForPass()); detail.textContent = t('count3',{n:selected.length}); action.disabled = selected.length !== 3;
     } else if (game.phase === 'received') {
       $('instruction').textContent = t(game.passOffset ? 'received' : 'chooseCard');
-      $('action-label').textContent = t(game.passOffset ? 'continue' : 'begin'); detail.hidden = true; action.disabled = false;
+      $('action-label').textContent = t('begin'); detail.hidden = true; action.disabled = false;
     } else if (game.phase === 'trick-end') {
       $('instruction').textContent = t('cardPlayed');
       $('action-label').textContent = t(game.history.length === 12 ? 'seeScores' : 'nextTrick'); detail.hidden = true; action.disabled = collection?.stage !== 'done';
@@ -299,7 +372,7 @@
       $('instruction').textContent = t('yourTurn');
       $('hand-note').textContent = t(hint,{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
     } else {
-      const note = game.phase === 'pass' ? 'passHint' : game.phase === 'received' ? game.passOffset ? 'receivedHint' : 'holdHint' : game.phase === 'trick-end' ? collection?.stage === 'done' ? 'readyWhenYouAre' : 'collectingHint' : 'yourTurnSoon';
+      const note = game.phase === 'pass' ? 'passHint' : game.phase === 'received' ? game.passOffset ? receipt?.stage === 'done' ? 'receivedHint' : 'receivingHint' : 'holdHint' : game.phase === 'trick-end' ? collection?.stage === 'done' ? 'readyWhenYouAre' : 'collectingHint' : 'yourTurnSoon';
       $('hand-note').textContent = t(note);
       if (game.phase === 'play') $('instruction').textContent = t('turn',{name:names()[game.turn]});
     }
@@ -317,6 +390,14 @@
     $('result-screen').querySelector('.result-continue').addEventListener('click',() => commit(over ? E.newGame(random) : E.nextHand(game,random)));
   }
   function render() {
+    const previousReceipt = receipt?.state === game ? receipt : null;
+    const receivedDone = previousReceipt && previousReceipt.stage !== 'waiting';
+    const receivedArrived = previousReceipt?.arrived || previousReceipt?.stage === 'moving';
+    clearReceipt();
+    if (game.phase === 'received' && game.received.length === 3) {
+      receipt = {state:game,stage:receivedDone || reducedMotion.matches || !Element.prototype.animate ? 'done' : 'waiting',arrived:receivedArrived,timer:null,animations:[],sources:[],layer:null};
+      document.querySelector('.table').dataset.receipt = receipt.stage;
+    }
     const collected = collection?.state === game && collection.stage === 'done';
     clearCollection();
     if (game.phase === 'trick-end') {
@@ -363,7 +444,7 @@
     else if (game.phase === 'trick-end' && collection?.stage === 'done') commit(E.collect(game));
     else if (game.phase === 'play' && game.turn === 0 && selected.length === 1) commit(E.play(game,0,selected[0]));
   });
-  function openDialog(id) { stopTimer(); pauseCollection(); $(id).showModal(); }
+  function openDialog(id) { stopTimer(); pauseCollection(); pauseReceipt(); $(id).showModal(); }
   function showLastTrick() {
     const trick = currentTrick(); if (!trick) return;
     if ($('menu-dialog').open) $('menu-dialog').close();
@@ -384,14 +465,15 @@
   $('language').addEventListener('change',() => { preferences.language = $('language').value; L.set(preferences.language); save(); render(); });
   $('pace').addEventListener('change',() => { preferences.pace = $('pace').value; save(); schedule(); });
   $('sound').addEventListener('change',() => { preferences.sound = $('sound').value === 'on'; unlockSound(); sound(); save(); });
-  document.addEventListener('visibilitychange',() => { if (document.hidden) { stopTimer(); pauseCollection(); save(); } else schedule(); });
-  window.addEventListener('pagehide',() => { stopTimer(); pauseCollection(); save(); });
+  document.addEventListener('visibilitychange',() => { if (document.hidden) { stopTimer(); pauseCollection(); pauseReceipt(); save(); } else schedule(); });
+  window.addEventListener('pagehide',() => { stopTimer(); pauseCollection(); pauseReceipt(); save(); });
   window.addEventListener('pageshow',schedule);
-  window.addEventListener('resize',() => { renderPiles(); if (collection?.stage === 'moving') finishCollection(collection); });
+  window.addEventListener('resize',() => { renderPiles(); if (collection?.stage === 'moving') finishCollection(collection); if (receipt?.stage === 'moving') finishReceipt(receipt); });
   reducedMotion.addEventListener('change',() => {
     if (!reducedMotion.matches) return;
     turnAnimation?.cancel(); turnAnimation = null;
     if (collection?.stage === 'moving') finishCollection(collection);
+    if (receipt && receipt.stage !== 'done') finishReceipt(receipt);
   });
   window.addEventListener('storage',event => {
     if (event.key !== KEY || !event.newValue) return;

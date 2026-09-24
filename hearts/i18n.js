@@ -31,6 +31,9 @@ window.HeartsText = (() => {
   Object.assign(en,{chooseAny:'Choose any card.',chooseLegal:'Choose a card that follows the rules.'});
   Object.assign(es,{chooseAny:'Elige cualquier carta.'});
   Object.assign(vi,{chooseAny:'Chọn bất kỳ lá nào.'});
+  Object.assign(en,{receivedHint:'Only the new cards are bright.',receivingHint:'Watch your new cards join your hand.',passedYou:'{name} passed you these',cardsAdded:'Added to your hand',newCardName:'New card: {card}'});
+  Object.assign(es,{receivedHint:'Solo las nuevas están sin sombrear.',receivingHint:'Mira cómo llegan tus cartas nuevas.',passedYou:'{name} te pasó estas cartas',cardsAdded:'Añadidas a tu mano',newCardName:'Carta nueva: {card}'});
+  Object.assign(vi,{receivedHint:'Chỉ các lá mới được giữ sáng.',receivingHint:'Xem bài mới về tay bạn.',passedYou:'{name} chuyển cho bạn',cardsAdded:'Đã thêm vào bài của bạn',newCardName:'Lá mới: {card}'});
   const languages = {en,es,vi};
   let language = 'en';
   function set(value) { language = Object.hasOwn(languages,value) ? value : 'en'; document.documentElement.lang = language; }

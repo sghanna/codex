@@ -10,7 +10,7 @@ try {
   await page.goto(url);
   await page.screenshot({path:`${artifacts}/game-received-${lang}.png`});
   assert.equal(await page.locator('.card.received').count(),3);
-  assert(await page.locator('.card.received').evaluateAll(cards=>cards.every(card=>parseFloat(getComputedStyle(card,'::after').height)<=20)), 'Received badges must not cover card faces');
+  assert(await page.locator('.card.received').evaluateAll(cards=>cards.every(card=>getComputedStyle(card).outlineStyle==='none'&&getComputedStyle(card,'::after').display==='none')), 'Received cards use brightness instead of outlines or badges');
   await page.locator('#menu-button').click();await page.screenshot({path:`${artifacts}/game-menu-${lang}.png`});
   await page.locator('#settings-button').click();await page.screenshot({path:`${artifacts}/game-settings-${lang}.png`});
   await page.locator('#settings-dialog .dialog-action').click();
