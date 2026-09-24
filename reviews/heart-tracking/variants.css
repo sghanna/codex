@@ -1,0 +1,30 @@
+/* Proposed cues only. Base cards, score columns, and legal-play shading remain. */
+#ownership-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; flex:none; margin:5px 0; }
+.ownership { display:flex; flex-direction:column; align-items:center; border:2px solid #708b78; border-radius:9px; padding:3px 0; color:#e6eddf; background:#133226; }
+.ownership.has-points { background:#fff4dc; border-color:#f4d08e; color:#192d21; }
+.owner-name { font-size:15px; font-weight:700; }
+.ownership strong { font-size:28px; line-height:31px; }
+.heart-symbol { color:#961c18; }
+.ownership:not(.has-points) .heart-symbol { color:#e6eddf; }
+.queen-token { font-size:15px; line-height:18px; font-weight:750; }
+#capture-panel { position:relative; flex:none; padding:10px 12px; margin:4px 2px 8px; border:2px solid #f5d28a; border-radius:12px; background:#fff4dc; color:#192d21; text-align:center; display:flex; flex-direction:column; gap:4px; font-size:18px; line-height:23px; }
+#capture-panel strong { font-size:25px; line-height:29px; }
+.panel-eyebrow { font-size:15px; font-weight:750; }
+[data-heart-option="B"] #table-status { display:none; }
+#moon-panel { margin:0 0 7px; padding:9px 10px; border:2px solid #f5d28a; border-radius:11px; background:#fff4dc; color:#192d21; display:flex; flex-direction:column; gap:4px; font-size:17px; line-height:21px; }
+#moon-panel strong { font-size:23px; line-height:26px; }
+#moon-panel.moon-blocked { background:#d7f1df; border-color:#81c89b; }
+.moon-count { font-weight:750; }
+.heart-strip { display:flex; justify-content:space-between; font-size:24px; line-height:27px; color:#5c6c61; }
+.heart-strip .taken { color:#961c18; }
+@media(min-width:650px) and (max-height:500px) {
+ #ownership-row { margin:2px 0; }.ownership { padding:0; }.ownership strong { font-size:25px; line-height:27px; }
+ #capture-panel { padding:5px 8px; margin-bottom:3px; gap:1px; }
+ #moon-panel { padding:5px 8px; gap:2px; }#moon-panel strong { font-size:21px; line-height:23px; }.heart-strip { font-size:21px; line-height:23px; }
+}
+/* Replace the old compact watch in these comparisons; avoid duplicating a cue. */
+[data-heart-option] #hand-watch { display:none; }
+[data-heart-option] .table { min-height:0; flex:1 0 auto; }
+[data-heart-option] .trick-field { min-height:0; flex:1 0 auto; }
+[data-heart-option="C"] #table-status { display:none; }
+#moon-panel { padding:6px 10px; gap:2px; }

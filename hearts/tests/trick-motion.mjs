@@ -29,7 +29,7 @@ async function open(state,viewport={width:390,height:740},reducedMotion='no-pref
 }
 async function finish(page) {
   await page.evaluate(() => document.getAnimations().forEach(animation => animation.finish()));
-  await page.waitForFunction(() => document.querySelector('.table').dataset.collection === 'done');
+  await page.waitForFunction(KEY => JSON.parse(localStorage.getItem(KEY)).game.phase !== 'trick-end',KEY);
 }
 try {
   for (const viewport of [{width:390,height:740},{width:375,height:667},{width:844,height:390}]) {
@@ -45,10 +45,8 @@ try {
       await finish(page);
       assert.equal(await page.locator(`[data-pile-for="${winner}"]`).getAttribute('data-tricks'),String(before + 1));
       assert.equal(await page.locator('.trick-flight').count(),0);
-      assert(await page.locator('#primary-action').isEnabled());
-      assert.deepEqual(await read(page),state,'Animation must not change saved scores or advance the hand');
+      assert.deepEqual(await read(page),E.collect(state),'Animation completion must advance exactly once');
       await page.screenshot({path:`${artifacts}/trick-pile-${winner}-${viewport.width}.png`});
-      await page.locator('#primary-action').click();
       assert.deepEqual(await read(page),E.collect(state),'Next trick must collect exactly once');
       await context.close();
     }
@@ -67,7 +65,7 @@ try {
     assert.deepEqual(await read(page),winners[0],'Reload during flight must preserve the completed trick');
     await page.clock.runFor(1250);
     await page.setViewportSize({width:844,height:390});
-    await page.waitForFunction(() => document.querySelector('.table').dataset.collection === 'done');
+    await page.waitForFunction(KEY => JSON.parse(localStorage.getItem(KEY)).game.phase !== 'trick-end',KEY);
     assert.equal(await page.locator('.trick-flight').count(),0,'Rotation must not leave flying cards behind');
     await context.close();
   }
@@ -75,8 +73,7 @@ try {
     const {context,page} = await open(finalTrick,{width:375,height:667},'reduce');
     await page.clock.runFor(1250);
     assert.equal(await page.locator('.trick-flight').count(),0,'Reduced motion must skip travel');
-    assert(await page.locator('#primary-action').isEnabled());
-    await page.locator('#primary-action').click();
+
     assert.deepEqual(await read(page),E.collect(finalTrick),'The final trick must lead to the correct scores');
     assert(await page.locator('#result-screen').isVisible());
     await context.close();
@@ -86,8 +83,8 @@ try {
     const page = await context.newPage();
     await page.addInitScript(({KEY,state}) => localStorage.setItem(KEY,JSON.stringify({version:2,game:state,selected:[]})),{KEY,state:winners[3]});
     await page.goto(url);
-    await page.waitForFunction(() => document.querySelector('.table').dataset.collection === 'done',{},{timeout:6000});
-    assert(await page.locator('#primary-action').isEnabled(),'The real-time animation must finish without a test-driven clock');
+    await page.waitForFunction(KEY => JSON.parse(localStorage.getItem(KEY)).game.phase !== 'trick-end',KEY,{timeout:6000});
+    assert.deepEqual(await read(page),E.collect(winners[3]),'Real-time collection must immediately advance without a test-driven clock');
     assert.equal(await page.locator('.trick-flight').count(),0);
     await context.close();
   }

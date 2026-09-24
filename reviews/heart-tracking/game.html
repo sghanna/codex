@@ -6,14 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#102a20">
   <title>Hearts</title>
-  <link rel="manifest" href="manifest.json?v=codex-hearts-v20">
-  <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png?v=codex-hearts-v20">
-  <link rel="icon" type="image/svg+xml" sizes="any" href="icons/icon.svg?v=codex-hearts-v20">
-  <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png?v=codex-hearts-v20">
+  <link rel="icon" type="image/png" sizes="32x32" href="../../hearts/icons/icon-32.png?v=codex-hearts-v16">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="../../hearts/icons/icon.svg?v=codex-hearts-v16">
+  <link rel="apple-touch-icon" sizes="180x180" href="../../hearts/icons/icon-180.png?v=codex-hearts-v16">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="style.css?v=codex-hearts-v20">
-  <link rel="stylesheet" href="screens.css?v=codex-hearts-v20">
-  <link rel="stylesheet" href="game.css?v=codex-hearts-v20">
+  <link rel="stylesheet" href="assets/style.css?v=codex-hearts-v16">
+  <link rel="stylesheet" href="assets/screens.css?v=codex-hearts-v16">
+  <link rel="stylesheet" href="assets/game.css?v=codex-hearts-v16">
+<link rel="stylesheet" href="variants.css?v=1">
 </head>
 <body>
 <main class="game" aria-label="Hearts game">
@@ -53,7 +53,6 @@
       <span class="trick-pile" data-pile-for="0" aria-hidden="true"><i></i><i></i><i></i></span>
 
       <div class="center-cards" id="center-cards" role="group" aria-label="Cards chosen to pass"></div>
-      <div class="ownership-row" id="ownership-row" role="group" hidden></div>
       <div class="table-status" id="table-status">Pass left to Michael</div>
     </div>
     <aside class="hand-watch" id="hand-watch" aria-live="polite" aria-atomic="true"></aside>
@@ -115,14 +114,15 @@
   <label class="setting"><span data-i18n="language">Language</span><select id="language"><option value="en">English</option><option value="es">Español</option><option value="vi">Tiếng Việt</option></select></label>
   <label class="setting"><span data-i18n="pace">Computer speed</span><select id="pace"><option value="slow" data-i18n="slow">Gentle</option><option value="normal" data-i18n="normal">Normal</option><option value="fast" data-i18n="fast">Quick</option></select></label>
   <label class="setting"><span data-i18n="sound">Soft card sounds</span><select id="sound"><option value="off" data-i18n="off">Off</option><option value="on" data-i18n="on">On</option></select></label>
-  <label class="setting"><span data-i18n="tapToPlay">Play cards with one tap</span><select id="tap-to-play"><option value="off" data-i18n="off">Off</option><option value="on" data-i18n="on">On</option></select></label>
   <h3 data-i18n="installTitle">Play offline</h3><p data-i18n="installText"></p>
   <button class="dialog-action" data-close data-i18n="back">Back to the game</button>
 </dialog>
-<script src="deck.js?v=codex-hearts-v20"></script>
-<script src="engine.js?v=codex-hearts-v20"></script>
-<script src="insights.js?v=codex-hearts-v20"></script>
-<script src="i18n.js?v=codex-hearts-v20"></script>
-<script src="app.js?v=codex-hearts-v20"></script>
+<script src="assets/deck.js?v=codex-hearts-v16"></script>
+<script src="assets/engine.js?v=codex-hearts-v16"></script>
+<script src="assets/insights.js?v=codex-hearts-v16"></script>
+<script src="assets/i18n.js?v=codex-hearts-v16"></script>
+<script src="fixtures.js?v=1"></script>
+<script src="variants.js?v=1"></script>
+<script src="demo-app.js?v=1"></script>
 </body>
 </html>

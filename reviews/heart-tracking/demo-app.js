@@ -1,10 +1,11 @@
+// Isolated snapshot before A + C adoption; preserves the original comparison.
 'use strict';
 (() => {
   const E = HeartsEngine, I = HeartsInsights, L = HeartsText, $ = id => document.getElementById(id);
-  const KEY = 'codex-hearts-game-v2', BACKUP = KEY + '-backup', PREFS = 'codex-hearts-settings-v2';
+  const KEY = HeartPreview.key, BACKUP = KEY + '-backup', PREFS = KEY + '-settings';
   const params = new URLSearchParams(location.search);
-  let preferences = { language:(navigator.languages || [navigator.language]).map(s => s.slice(0,2)).find(s => ['en','es','vi'].includes(s)) || 'en', pace:'slow', sound:false, tapToPlay:false };
-  try { const p = JSON.parse(localStorage.getItem(PREFS)); if (p) preferences = { language:['en','es','vi'].includes(p.language) ? p.language : preferences.language, pace:['slow','normal','fast'].includes(p.pace) ? p.pace : 'slow', sound:p.sound === true, tapToPlay:p.tapToPlay === true }; } catch {}
+  let preferences = { language:(navigator.languages || [navigator.language]).map(s => s.slice(0,2)).find(s => ['en','es','vi'].includes(s)) || 'en', pace:'slow', sound:false };
+  try { const p = JSON.parse(localStorage.getItem(PREFS)); if (p) preferences = { language:['en','es','vi'].includes(p.language) ? p.language : preferences.language, pace:['slow','normal','fast'].includes(p.pace) ? p.pace : 'slow', sound:p.sound === true }; } catch {}
   if (['en','es','vi'].includes(params.get('lang'))) preferences.language = params.get('lang');
   L.set(preferences.language);
   const t = L.t;
@@ -13,6 +14,7 @@
   const rankKey = {A:'ace',J:'jack',Q:'queen',K:'king'};
   const cardName = code => t('cardName',{rank:rankKey[code.slice(0,-1)] ? t(rankKey[code.slice(0,-1)]) : code.slice(0,-1),suit:t(suitKey[E.suit(code)])});
   const face = code => cardSVG(code.slice(0,-1),E.suit(code));
+  const moonIcon = '<svg class="watch-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A9 9 0 0 1 8.5 4a9 9 0 1 0 11.5 11.5Z" fill="#f4d28a" stroke="#fff0bc" stroke-width="1.3"/></svg>';
   const awardIcon = '<svg class="result-emblem" viewBox="0 0 32 32" aria-hidden="true"><path d="M11 27C1 22 2 10 7 5m14 22c10-5 9-17 4-22M5 10l5 2M4 17l6 1m-3 5 5-1m15-12-5 2m6 5-6 1m3 5-5-1" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="m16 9 6 7-6 7-6-7Z" fill="currentColor"/></svg>';
   const esc = text => String(text).replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const check = '<span class="check" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="m3 9 4 4 8-8" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
@@ -31,7 +33,6 @@
     game = E.newGame(random);
     try { if (localStorage.getItem(KEY)) recovery = t('damaged'); } catch {}
   }
-  if (forcedCard()) selected = [forcedCard()];
   document.documentElement.dataset.layout = 'overlap';
 
   function save() {
@@ -46,11 +47,6 @@
   }
   function announce(message) { $('live-status').textContent = message; }
   function stopTimer() { clearTimeout(timer); timer = null; }
-  function forcedCard() {
-    if (game.phase !== 'play' || game.turn !== 0) return null;
-    const legal = E.legalCards(game,0);
-    return legal.length === 1 ? legal[0] : null;
-  }
   function pauseAdvance() {
     if (!advance || advance.startedAt === null) return;
     clearTimeout(advance.timer);
@@ -58,9 +54,8 @@
     advance.startedAt = null; advance.timer = null;
   }
   function resumeAdvance() {
-    const card = forcedCard();
-    if (!card) return;
-    advance ||= {state:game,remaining:3000,card,startedAt:null,timer:null};
+    if (game.phase !== 'trick-end' || collection?.stage !== 'done') return;
+    advance ||= {state:game,remaining:4000,startedAt:null,timer:null};
     const current = advance;
     renderAction();
     current.startedAt = Date.now();
@@ -68,17 +63,15 @@
       if (advance !== current || game !== current.state) return;
       pauseAdvance();
       if (document.hidden || document.querySelector('dialog[open]')) return;
-      if (current.remaining === 0) {
-        if (forcedCard() === current.card) commit(E.play(game,0,current.card));
-      }
+      if (current.remaining === 0) commit(E.collect(game));
       else resumeAdvance();
     },Math.min(1000,current.remaining));
   }
   function schedule() {
+    if (!HeartPreview.playing) { stopTimer(); pauseAdvance(); pauseCollection(); pauseReceipt(); return; }
     stopTimer(); pauseAdvance();
     if (advance?.state !== game) advance = null;
     if (document.hidden || document.querySelector('dialog[open]')) { pauseCollection(); pauseReceipt(); return; }
-    if (game.phase === 'trick-end' && collection?.stage === 'done') { commit(E.collect(game)); return; }
     resumeCollection(); resumeReceipt(); resumeAdvance();
     if (game.phase !== 'play' || game.turn === 0) return;
     timer = setTimeout(() => {
@@ -196,41 +189,27 @@
   }
   function renderScores() {
     const summary = I.summarize(game);
-    const active = game.phase === 'play' || game.phase === 'trick-end';
-    document.querySelector('.game').classList.toggle('tracking-points',active);
-    document.querySelector('.game').classList.toggle('trick-complete',game.phase === 'trick-end');
-    document.querySelector('.game').classList.toggle('full-hand',game.hands[0].length > 9);
-    const ownership = $('ownership-row');
-    ownership.hidden = !active;
-    ownership.setAttribute('aria-label',t('heartsTaken'));
-    const owners = [1,2,3,0].map(player => `<div class="ownership ${summary.points[player] ? 'has-points' : ''}" data-owner="${player}" role="group" aria-label="${esc(t('ownershipSummary',{name:names()[player],n:summary.hearts[player],queen:summary.queenOwner === player ? t('queenTaken') : ''}))}"><span class="owner-name">${esc(names()[player])}</span><div class="owner-cards" aria-hidden="true"><strong><span class="heart-symbol">♥</span> <span data-hearts-for="${player}">${summary.hearts[player]}</span></strong>${summary.queenOwner === player ? '<span class="queen-token">Q♠</span>' : ''}</div></div>`).join('');
-    if (ownership.innerHTML !== owners) ownership.innerHTML = owners;
     document.querySelectorAll('[data-hand-for]').forEach(node => node.textContent = summary.points[Number(node.dataset.handFor)]);
     document.querySelectorAll('.seat').forEach(seat => {
       const player = Number(seat.dataset.player);
       seat.setAttribute('aria-label',t('seatSummary',{name:names()[player],hand:summary.points[player],total:game.scores[player],hearts:summary.hearts[player],queen:summary.queenOwner === player ? t('queenTaken') : ''}));
-      seat.classList.toggle('moon-holder',summary.candidate === player);
+      seat.classList.toggle('moon-holder',summary.candidate === player && ['watch','danger','complete'].includes(summary.moon));
     });
     const watch = $('hand-watch');
     watch.dataset.moon = summary.moon;
     watch.className = 'hand-watch';
     let html;
-    if (active && summary.candidate !== -1) {
+    if (['watch','danger','complete'].includes(summary.moon)) {
       watch.classList.add('is-watch');
-      if (['danger','complete'].includes(summary.moon)) watch.classList.add('is-danger');
+      if (summary.moon !== 'watch') watch.classList.add('is-danger');
       const name = names()[summary.candidate];
-      const complete = summary.remaining === 0;
-      const title = t(complete ? summary.candidate === 0 ? 'youShotMoon' : 'moon' : summary.candidate === 0 ? 'yourMoonChance' : 'theirMoonChance',{name});
+      const title = summary.moon === 'complete' ? t('moon',{name}) : t(summary.moon === 'danger' ? 'moonWarning' : 'moonWatch',{name});
       const queen = summary.queenOwner === summary.candidate ? t('queenTaken') : t('queenStillOut');
-      const advice = t(complete ? summary.candidate === 0 ? 'othersGet26' : 'youGet26' : summary.candidate === 0 ? 'takeAllPoints' : summary.hearts[summary.candidate] === 13 ? 'stopWithQueen' : 'stopTheirMoon');
-      html = `<div class="watch-title">${esc(title)}</div><div class="watch-detail moon-count">${esc(t('moonProgress',{n:summary.hearts[summary.candidate],queen}))}</div><div class="heart-strip" aria-hidden="true">${Array.from({length:13},(_,i) => `<span class="${i < summary.hearts[summary.candidate] ? 'taken' : ''}">${i < summary.hearts[summary.candidate] ? '♥' : '♡'}</span>`).join('')}</div><div class="watch-advice">${esc(advice)}</div>`;
-    } else if (active && summary.moon === 'blocked') {
-      watch.classList.add('moon-blocked');
-      html = `<div class="watch-title">${esc(t('noMoon'))}</div><div class="watch-detail">${esc(t('pointsSplit'))}</div>`;
+      html = `<div class="watch-title">${moonIcon}<span>${esc(title)}</span><strong class="watch-points">${summary.points[summary.candidate]}/26</strong></div><div class="watch-detail">${esc(t('moonProgress',{n:summary.hearts[summary.candidate],queen}))}</div><div class="moon-meter" aria-hidden="true"><span style="width:${summary.points[summary.candidate]/26*100}%"></span></div>`;
     } else if (game.phase === 'pass' || game.phase === 'received') {
       html = `<div class="watch-title">${esc(t('handNumber',{n:game.handNumber}))}</div><div class="watch-detail">${esc(t('pointReminder'))}</div>`;
     } else {
-      html = `<div class="watch-title">${esc(t('noPointsTaken'))}</div><div class="watch-detail">${esc(t('allPointsOut'))}</div>`;
+      html = `<div class="watch-title">${esc(t('handProgress',{n:Math.min(13,game.history.length+1),points:summary.remaining}))}</div><div class="watch-detail">${esc(summary.moon === 'blocked' ? t('moonBlocked') : t(game.heartsBroken ? 'heartsOpen' : 'heartsClosed'))}</div>`;
     }
     // A live region changes only when its information changes, not on card selection.
     if (watchMarkup !== html) { watch.innerHTML = html; watchMarkup = html; }
@@ -384,17 +363,18 @@
       $('instruction').textContent = t(game.passOffset ? 'received' : 'chooseCard');
       $('action-label').textContent = t('begin'); detail.hidden = true; action.disabled = false;
     } else if (game.phase === 'trick-end') {
-      const winner = E.trickResult(game.trick).winner;
-      $('instruction').textContent = t(winner === 0 ? 'youTookTrick' : 'tookTrick',{name:names()[winner]});
+      $('instruction').textContent = t('cardPlayed');
       $('action-label').textContent = t(game.history.length === 12 ? 'seeScores' : 'nextTrick'); detail.hidden = true; action.disabled = collection?.stage !== 'done';
+      if (!action.disabled) {
+        detail.hidden = false;
+        detail.textContent = t('autoSeconds',{n:Math.max(1,Math.ceil((advance?.remaining ?? 4000)/1000))});
+      }
     } else {
       const legal = E.legalCards(game,0);
       $('instruction').textContent = game.turn !== 0 ? t('wait') : !game.history.length && !game.trick.length ? t('leadTwo') : t('chooseCard');
       $('action-label').textContent = t(game.turn === 0 ? 'playCard' : 'wait');
       detail.textContent = selected.length ? selected[0].replace(/C$/,'♣').replace(/D$/,'♦').replace(/S$/,'♠').replace(/H$/,'♥') : t('choose1');
-      if (legal.length === 1 && game.turn === 0) detail.textContent = t('autoSeconds',{n:Math.max(1,Math.ceil((advance?.remaining ?? 3000)/1000))});
       detail.hidden = game.turn !== 0; action.disabled = game.turn !== 0 || selected.length !== 1 || !legal.includes(selected[0]);
-      if (game.turn === 0 && preferences.tapToPlay && !selected.length) { $('action-label').textContent = t('tapACard'); detail.hidden = true; }
     }
     document.querySelector('.action-arrow').style.transform = game.phase === 'pass' ? ({1:'',3:'rotate(180deg)',2:'rotate(90deg)'}[game.passOffset]) : 'rotate(180deg)';
     renderGuidance();
@@ -414,7 +394,7 @@
     if (ownTurn) {
       const guide = I.guidance(game);
       const allPlayable = guide.legal.length === game.hands[0].length;
-      const hint = guide.legal.length === 1 ? 'onlyCard' : preferences.tapToPlay ? allPlayable ? 'tapAny' : guide.reason === 'follow' ? 'tapFollow' : 'tapPlayable' : selected.length ? 'confirmCard'
+      const hint = selected.length ? guide.legal.length === 1 ? 'onlyCard' : 'confirmCard'
         : allPlayable ? 'chooseAny' : {opening:'leadTwo',follow:'followSuit',free:'brightCards',firstDiscard:'firstNoPoints',heartsLocked:'heartsClosed'}[guide.reason];
       $('instruction').textContent = t('yourTurn');
       $('hand-note').textContent = t(hint,{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
@@ -465,8 +445,8 @@
     document.querySelector('.game').classList.toggle('showing-results',results);
     $('result-screen').hidden = !results;
     if (results) renderResult(); else { renderHand(); renderTable(); renderAction(); }
+    HeartPreview.render(game);
     $('language').value = preferences.language; $('pace').value = preferences.pace; $('sound').value = preferences.sound ? 'on' : 'off';
-    $('tap-to-play').value = preferences.tapToPlay ? 'on' : 'off';
     schedule();
   }
   function selectCard(code) {
@@ -477,8 +457,6 @@
       const message = t(guide.reason === 'follow' ? 'mustFollow' : guide.reason === 'heartsLocked' ? 'heartsClosed' : guide.reason === 'firstDiscard' ? 'firstNoPoints' : 'chooseLegal',{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
       $('hand-note').textContent = message; announce(message); return;
     }
-    if (game.phase === 'play' && preferences.tapToPlay) { commit(E.play(game,0,code)); return; }
-    if (forcedCard() === code) return;
     if (selected.includes(code)) selected = selected.filter(c => c !== code);
     else if (game.phase === 'pass') {
       if (selected.length === 3) { announce(t('limit3')); return; }
@@ -515,7 +493,6 @@
   $('language').addEventListener('change',() => { preferences.language = $('language').value; L.set(preferences.language); save(); render(); });
   $('pace').addEventListener('change',() => { preferences.pace = $('pace').value; save(); schedule(); });
   $('sound').addEventListener('change',() => { preferences.sound = $('sound').value === 'on'; unlockSound(); sound(); save(); });
-  $('tap-to-play').addEventListener('change',() => { preferences.tapToPlay = $('tap-to-play').value === 'on'; save(); render(); });
   document.addEventListener('visibilitychange',() => { if (document.hidden) { stopTimer(); pauseAdvance(); pauseCollection(); pauseReceipt(); save(); } else schedule(); });
   window.addEventListener('pagehide',() => { stopTimer(); pauseAdvance(); pauseCollection(); pauseReceipt(); save(); });
   window.addEventListener('pageshow',schedule);
@@ -529,8 +506,8 @@
   window.addEventListener('storage',event => {
     if (event.key !== KEY || !event.newValue) return;
     const latest = read(KEY); if (!latest) return;
-    stopTimer(); game = latest.game; selected = forcedCard() ? [forcedCard()] : []; render();
+    stopTimer(); game = latest.game; selected = []; render();
   });
   render(); save(); if (recovery) announce(recovery); if (!saved) animateDeal();
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+
 })();

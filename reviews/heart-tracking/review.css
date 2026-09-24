@@ -1,0 +1,5 @@
+.controls button[aria-pressed="true"] { background:#ffe2a0; color:#24180d; }
+.scene-note { padding:12px 16px; border-left:4px solid #e4c783; background:#1f3428; max-width:950px; }
+article > p { min-height:105px; }
+article .tradeoff { min-height:0; font-size:16px; padding:8px 4px 0; }
+@media(min-width:1240px) { main{max-width:1300px}.options{gap:20px} }

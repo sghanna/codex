@@ -24,7 +24,6 @@ try{
   assert.equal(await page.locator('.trick-flight').count(),0);
   const points=summary.points;
   if(s.history.length<12){
-   await page.locator('#primary-action').click();
    for(let p=0;p<4;p++)assert.equal(await page.locator(`[data-hand-for="${p}"]`).textContent(),String(points[p]));
   }
   await page.close();
@@ -53,7 +52,7 @@ try{
  await page.locator(`[data-card="${legal[0]}"]`).click({position:{x:20,y:20}});
  assert.equal(await page.evaluate(()=>window.watchMutations),0,'Selecting a card must not reannounce the moon banner');
  await page.close();
- // A human who holds 2C gets a ready-to-confirm opening card, with no automatic move.
+ // A human who holds 2C gets an immediate selection and a three-second countdown.
  let opening;
  for(let seed=1;seed<100 && !opening;seed++){
   let value=seed;const random=()=>{value=(Math.imul(value,1664525)+1013904223)>>>0;return value/4294967296};
@@ -64,10 +63,10 @@ try{
  await sole.locator('#primary-action').click();
  assert.equal(await sole.locator('#hand [aria-pressed="true"]').getAttribute('data-card'),'2C');
  assert(!(await sole.locator('#primary-action').isDisabled()));
- await sole.clock.runFor(6000);
+ await sole.clock.runFor(2500);
  assert.equal(await sole.evaluate(KEY=>JSON.parse(localStorage.getItem(KEY)).game.trick.length,KEY),0);
- await sole.locator('#primary-action').click();
+ await sole.clock.runFor(500);
  assert.equal(await sole.evaluate(KEY=>JSON.parse(localStorage.getItem(KEY)).game.trick[0].card,KEY),'2C');
  await sole.close();
- console.log('PASS: live hand scores, moon progression, full-size played cards, reduced motion, legal-card guidance, stable announcements, and sole-card confirmation.');
+ console.log('PASS: live hand scores, moon progression, full-size played cards, reduced motion, legal-card guidance, stable announcements, and sole-card auto play.');
 }finally{await browser.close()}

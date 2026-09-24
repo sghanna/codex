@@ -29,7 +29,7 @@ try{
   }else if(s.phase==='trick-end'){
    if(!restoreChecked){await page.reload();assert.equal((await read()).game.phase,'trick-end');await page.locator('#menu-button').click();await page.locator('#last-trick-button').click();assert.equal(await page.locator('.review-card').count(),4);await page.locator('#last-trick-dialog [data-close]').click();restoreChecked=true;}
    await page.clock.runFor(2400);
-   await page.locator('#primary-action').click();
+   await page.waitForFunction(({KEY,count})=>JSON.parse(localStorage.getItem(KEY)).game.history.length===count+1,{KEY,count:s.history.length},{timeout:6000});
   }
  }
  saved=await read();assert.equal(saved.game.history.length,13);assert.equal(saved.game.handPoints.reduce((a,b)=>a+b),26);
