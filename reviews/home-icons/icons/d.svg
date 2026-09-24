@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Hearts"><defs>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Gold seal"><defs>
   <radialGradient id="felt" cx=".35" cy=".15" r="1"><stop stop-color="#245d44"/><stop offset="1" stop-color="#0c2b21"/></radialGradient>
   <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0bd"/><stop offset=".5" stop-color="#e9c575"/><stop offset="1" stop-color="#c99743"/></linearGradient>
   <linearGradient id="night" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#23496b"/><stop offset="1" stop-color="#101f3b"/></linearGradient>
