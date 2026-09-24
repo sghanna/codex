@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  const E = HeartsEngine, L = HeartsText, $ = id => document.getElementById(id);
+  const E = HeartsEngine, I = HeartsInsights, L = HeartsText, $ = id => document.getElementById(id);
   const KEY = 'codex-hearts-game-v2', BACKUP = KEY + '-backup', PREFS = 'codex-hearts-settings-v2';
   const params = new URLSearchParams(location.search);
   let preferences = { language:(navigator.languages || [navigator.language]).map(s => s.slice(0,2)).find(s => ['en','es','vi'].includes(s)) || 'en', pace:'slow', sound:false };
@@ -13,6 +13,8 @@
   const rankKey = {A:'ace',J:'jack',Q:'queen',K:'king'};
   const cardName = code => t('cardName',{rank:rankKey[code.slice(0,-1)] ? t(rankKey[code.slice(0,-1)]) : code.slice(0,-1),suit:t(suitKey[E.suit(code)])});
   const face = code => cardSVG(code.slice(0,-1),E.suit(code));
+  const moonIcon = '<svg class="watch-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.5A9 9 0 0 1 8.5 4a9 9 0 1 0 11.5 11.5Z" fill="#f4d28a" stroke="#fff0bc" stroke-width="1.3"/></svg>';
+  const awardIcon = '<svg class="result-emblem" viewBox="0 0 32 32" aria-hidden="true"><path d="M11 27C1 22 2 10 7 5m14 22c10-5 9-17 4-22M5 10l5 2M4 17l6 1m-3 5 5-1m15-12-5 2m6 5-6 1m3 5-5-1" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><path d="m16 9 6 7-6 7-6-7Z" fill="currentColor"/></svg>';
   const esc = text => String(text).replace(/[&<>"']/g,c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const check = '<span class="check" aria-hidden="true"><svg viewBox="0 0 18 18"><path d="m3 9 4 4 8-8" stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
   const random = () => { const bytes = new Uint32Array(1); crypto.getRandomValues(bytes); return bytes[0] / 4294967296; };
@@ -67,14 +69,59 @@
     oscillator.connect(gain).connect(audio.destination); oscillator.start(now); oscillator.stop(now + .08);
   }
   function commit(next) {
-    stopTimer(); game = next; selected = []; save(); render(); sound();
+    const previous = I.summarize(game).points;
+    stopTimer(); game = next; selected = [];
+    const legal = E.legalCards(game,0);
+    if (legal.length === 1) selected = [legal[0]];
+    save(); render(); sound();
+    if (game.phase === 'pass' || game.phase === 'received' && !game.passOffset) animateDeal();
+    else if (game.phase === 'trick-end' && !reducedMotion.matches) {
+      const points = I.summarize(game).points;
+      document.querySelectorAll('[data-hand-for]').forEach(node => {
+        if (points[Number(node.dataset.handFor)] > previous[Number(node.dataset.handFor)]) node.animate([{transform:'scale(1)'},{transform:'scale(1.12)'},{transform:'scale(1)'}],{duration:360});
+      });
+    }
     if (!$('result-screen').hidden) $('result-title').focus({preventScroll:true});
-    announce($('result-screen').hidden ? $('table-status').textContent : $('result-title').textContent);
+    announce(!$('result-screen').hidden ? $('result-title').textContent : game.phase === 'play' ? $('instruction').textContent + '. ' + $('hand-note').textContent : $('table-status').textContent);
   }
   const passDirection = offset => ({1:'left',3:'right',2:'across'}[offset]);
   const actionForPass = () => ({1:'passLeft',3:'passRight',2:'passAcross'}[game.passOffset]);
   const currentTrick = () => game.phase === 'trick-end' ? {cards:game.trick,...E.trickResult(game.trick)} : game.history.at(-1);
   const isResult = () => game.phase === 'hand-end' || game.phase === 'game-over';
+
+  function animateDeal() {
+    if (reducedMotion.matches) return;
+    document.querySelectorAll('#hand .card').forEach((card,index) => card.animate([
+      {opacity:0,translate:'0 8px'}, {opacity:1,translate:'0 0'}
+    ],{duration:220,delay:index * 16,fill:'backwards',easing:'ease-out'}));
+  }
+  function renderScores() {
+    const summary = I.summarize(game);
+    document.querySelectorAll('[data-hand-for]').forEach(node => node.textContent = summary.points[Number(node.dataset.handFor)]);
+    document.querySelectorAll('.seat').forEach(seat => {
+      const player = Number(seat.dataset.player);
+      seat.setAttribute('aria-label',t('seatSummary',{name:names()[player],hand:summary.points[player],total:game.scores[player],hearts:summary.hearts[player],queen:summary.queenOwner === player ? t('queenTaken') : ''}));
+      seat.classList.toggle('moon-holder',summary.candidate === player && ['watch','danger','complete'].includes(summary.moon));
+    });
+    const watch = $('hand-watch');
+    watch.dataset.moon = summary.moon;
+    watch.className = 'hand-watch';
+    let html;
+    if (['watch','danger','complete'].includes(summary.moon)) {
+      watch.classList.add('is-watch');
+      if (summary.moon !== 'watch') watch.classList.add('is-danger');
+      const name = names()[summary.candidate];
+      const title = summary.moon === 'complete' ? t('moon',{name}) : t(summary.moon === 'danger' ? 'moonWarning' : 'moonWatch',{name});
+      const queen = summary.queenOwner === summary.candidate ? t('queenTaken') : t('queenStillOut');
+      html = `<div class="watch-title">${moonIcon}<span>${esc(title)}</span><strong class="watch-points">${summary.points[summary.candidate]}/26</strong></div><div class="watch-detail">${esc(t('moonProgress',{n:summary.hearts[summary.candidate],queen}))}</div><div class="moon-meter" aria-hidden="true"><span style="width:${summary.points[summary.candidate]/26*100}%"></span></div>`;
+    } else if (game.phase === 'pass' || game.phase === 'received') {
+      html = `<div class="watch-title">${esc(t('handNumber',{n:game.handNumber}))}</div><div class="watch-detail">${esc(t('pointReminder'))}</div>`;
+    } else {
+      html = `<div class="watch-title">${esc(t('handProgress',{n:Math.min(13,game.history.length+1),points:summary.remaining}))}</div><div class="watch-detail">${esc(summary.moon === 'blocked' ? t('moonBlocked') : t(game.heartsBroken ? 'heartsOpen' : 'heartsClosed'))}</div>`;
+    }
+    // A live region changes only when its information changes, not on card selection.
+    if (watch.innerHTML !== html) watch.innerHTML = html;
+  }
 
   function clearCollection() {
     const previous = collection;
@@ -92,16 +139,14 @@
     const counts = [0,0,0,0];
     game.history.forEach(trick => counts[trick.winner]++);
     if (collection?.stage === 'done') counts[collection.winner]++;
-    const tableBox = document.querySelector('.table').getBoundingClientRect();
+    const tableBox = document.querySelector('.trick-field').getBoundingClientRect();
     document.querySelectorAll('[data-pile-for]').forEach(pile => {
       const player = Number(pile.dataset.pileFor);
       pile.dataset.tricks = counts[player];
       pile.classList.toggle('has-tricks',counts[player] > 0);
-      if (player) {
-        const seat = document.querySelectorAll('.seat')[player - 1].getBoundingClientRect();
-        pile.style.left = (seat.left - tableBox.left + seat.width / 2 - 16) + 'px';
-        pile.style.top = (seat.bottom - tableBox.top + 5) + 'px';
-      }
+      const seat = document.querySelector(`.seat[data-player="${player}"]`).getBoundingClientRect();
+      pile.style.left = (seat.left - tableBox.left + seat.width / 2 - 16) + 'px';
+      pile.style.top = '6px';
     });
   }
   function pauseCollection() {
@@ -193,22 +238,21 @@
       $('center-cards').setAttribute('aria-label',cards.map(cardName).join(', '));
       $('table-status').textContent = !game.passOffset ? t('hold') : game.phase === 'received' ? t('receivedFrom',{name:names()[(4-game.passOffset)%4]}) : t('passTo',{direction:t(passDirection(game.passOffset)),name:names()[game.passOffset]});
     } else {
-      const positions = ['you-played','west','north','east'];
-      $('center-cards').innerHTML = game.trick.map(play => `<div class="trick-card ${positions[play.player]}" aria-label="${esc(names()[play.player] + ': ' + cardName(play.card))}" role="img">${face(play.card)}</div>`).join('');
+      $('center-cards').innerHTML = [1,2,3,0].map(player => {
+        const play = game.trick.find(play => play.player === player);
+        return `<div class="trick-slot" data-trick-player="${player}">${play ? `<div class="trick-card" aria-label="${esc(names()[player] + ': ' + cardName(play.card))}" role="img">${face(play.card)}</div>` : '<span class="empty-trick" aria-hidden="true"></span>'}</div>`;
+      }).join('');
       $('center-cards').setAttribute('aria-label',game.trick.map(play => names()[play.player] + ': ' + cardName(play.card)).join(', '));
       if (game.phase === 'trick-end') {
         const result = E.trickResult(game.trick);
-        $('table-status').textContent = t(result.winner === 0 ? 'yourTrick' : 'trickWon',{name:names()[result.winner],n:result.points});
-      } else if (game.turn === 0) {
-        $('table-status').textContent = game.trick.length ? t('follow',{suit:t(suitKey[E.suit(game.trick[0].card)])}) : t('yourTurn');
-        if (game.trick.length && !game.hands[0].some(c => E.suit(c) === E.suit(game.trick[0].card))) $('table-status').textContent = t('yourTurn');
-      } else $('table-status').textContent = t('turn',{name:names()[game.turn]});
+        $('table-status').textContent = result.winner === 0 && !result.points ? t('cleanTrick') : t(result.winner === 0 ? 'yourTrick' : 'trickWon',{name:names()[result.winner],n:result.points});
+      } else $('table-status').textContent = t('trickPoints',{n:I.summarize(game).onTable});
     }
     $('center-cards').querySelectorAll('svg').forEach(svg => svg.setAttribute('aria-hidden','true'));
-    document.querySelectorAll('.seat').forEach((seat,i) => seat.classList.toggle('is-turn',game.phase === 'play' && game.turn === i+1));
+    document.querySelectorAll('.seat').forEach(seat => seat.classList.toggle('is-turn',game.phase === 'play' && game.turn === Number(seat.dataset.player)));
     const winner = game.phase === 'trick-end' ? E.trickResult(game.trick).winner : -1;
-    document.querySelectorAll('.seat').forEach((seat,i) => seat.classList.toggle('is-winner',winner === i+1));
-    document.querySelector('.you-score').classList.toggle('is-winner',winner === 0);
+    document.querySelectorAll('.seat').forEach(seat => seat.classList.toggle('is-winner',winner === Number(seat.dataset.player)));
+    $('table-status').classList.toggle('clean-trick',winner === 0 && E.trickResult(game.trick).points === 0);
     if (collection?.stage === 'done') $('center-cards').classList.add('trick-gathered');
     renderPiles();
   }
@@ -232,12 +276,29 @@
       detail.hidden = game.turn !== 0; action.disabled = game.turn !== 0 || selected.length !== 1 || !legal.includes(selected[0]);
     }
     document.querySelector('.action-arrow').style.transform = game.phase === 'pass' ? ({1:'',3:'rotate(180deg)',2:'rotate(90deg)'}[game.passOffset]) : 'rotate(180deg)';
+    renderGuidance();
+  }
+  function renderGuidance() {
+    const ownTurn = game.phase === 'play' && game.turn === 0;
+    document.querySelector('.hand-area').classList.toggle('is-your-turn',ownTurn);
+    $('legal-count').textContent = ownTurn ? t('playableCount',{n:E.legalCards(game,0).length}) : '';
+    if (ownTurn) {
+      const guide = I.guidance(game);
+      const title = {opening:'leadTwo',follow:'followSuit',free:'yourChoice',firstDiscard:'firstTrick',heartsLocked:'leadSuit'}[guide.reason];
+      $('instruction').textContent = t(title,{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
+      $('hand-note').textContent = selected.length ? t(guide.legal.length === 1 ? 'onlyCard' : 'confirmCard') : t(guide.reason === 'heartsLocked' ? 'heartsClosed' : guide.reason === 'firstDiscard' ? 'firstNoPoints' : 'brightCards');
+    } else {
+      const note = game.phase === 'pass' ? 'passHint' : game.phase === 'received' ? game.passOffset ? 'receivedHint' : 'holdHint' : game.phase === 'trick-end' ? collection?.stage === 'done' ? 'readyWhenYouAre' : 'collectingHint' : 'yourTurnSoon';
+      $('hand-note').textContent = t(note);
+      if (game.phase === 'play') $('instruction').textContent = t('turn',{name:names()[game.turn]});
+    }
   }
   function renderResult() {
     const result = game.result, over = game.phase === 'game-over';
     const order = [0,1,2,3]; if (over) order.sort((a,b) => game.scores[a] - game.scores[b]);
     const nextOffset = [1,3,2,0][game.handNumber % 4];
-    $('result-screen').innerHTML = `<div class="result-heading"><h2 id="result-title" tabindex="-1">${esc(over ? result.winner === 0 ? t('youWon') : t('won',{name:names()[result.winner]}) : t('handComplete'))}</h2>${result.moon === -1 && !result.tied ? `<p>${esc(over ? t('lowestScore',{n:game.scores[result.winner]}) : t('lowest'))}</p>` : ''}</div>
+    const clean = !over && result.moon === -1 && result.added[0] === 0;
+    $('result-screen').innerHTML = `<div class="result-heading"><h2 id="result-title" tabindex="-1">${over && result.winner === 0 || clean ? awardIcon : ''}${esc(over ? result.winner === 0 ? t('youWon') : t('won',{name:names()[result.winner]}) : clean ? t('cleanHand') : t('handComplete'))}</h2>${result.moon === -1 && !result.tied ? `<p>${esc(over ? t('lowestScore',{n:game.scores[result.winner]}) : clean ? t('cleanHandDetail') : t('lowest'))}</p>` : ''}</div>
       ${result.moon !== -1 ? `<div class="result-notice"><strong>${esc(t('moon',{name:names()[result.moon]}))}</strong><p>${esc(t('moonDetail'))}</p></div>` : ''}
       ${over && result.moon === -1 ? `<p class="game-end-reason">${esc(t('endReason'))}</p>` : ''}
       <table class="result-scores"><caption class="sr-only">${esc(t('totalScores'))}</caption><thead><tr><th scope="col">${esc(t('player'))}</th><th scope="col">${esc(t('thisHand'))}</th><th scope="col">${esc(t('total'))}</th></tr></thead><tbody>${order.map(p => `<tr class="${p===0?'your-score-row':''}"><th scope="row">${esc(names()[p])}</th><td class="score-added">${result.added[p] ? '+' : ''}${result.added[p]}</td><td class="score-total">${game.scores[p]}</td></tr>`).join('')}</tbody></table>
@@ -256,7 +317,7 @@
     document.querySelectorAll('[data-close].close-button').forEach(button => button.setAttribute('aria-label',t('close')));
     $('help-button').setAttribute('aria-label',t('help'));
     document.querySelectorAll('[data-total-for]').forEach(node => node.textContent = game.scores[['You','Michael','Jerry','Barbara'].indexOf(node.dataset.totalFor)]);
-    document.querySelector('.you-score').setAttribute('aria-label',t('you') + ': ' + t('points',{n:game.scores[0]}));
+    renderScores();
     const pending = game.phase === 'trick-end' ? E.trickResult(game.trick) : null;
     $('hand-points-note').textContent = t('handPoints',{n:game.handPoints[0] + (pending?.winner === 0 ? pending.points : 0)});
     $('last-trick-button').disabled = !currentTrick();
@@ -271,7 +332,11 @@
   function selectCard(code) {
     unlockSound();
     if (game.phase !== 'pass' && (game.phase !== 'play' || game.turn !== 0)) return;
-    if (game.phase === 'play' && !E.legalCards(game,0).includes(code)) { announce(t('chooseLegal')); return; }
+    if (game.phase === 'play' && !E.legalCards(game,0).includes(code)) {
+      const guide = I.guidance(game);
+      const message = t(guide.reason === 'follow' ? 'mustFollow' : guide.reason === 'heartsLocked' ? 'heartsClosed' : guide.reason === 'firstDiscard' ? 'firstNoPoints' : 'chooseLegal',{suit:guide.suit ? t(suitKey[guide.suit]) : ''});
+      $('hand-note').textContent = message; announce(message); return;
+    }
     if (selected.includes(code)) selected = selected.filter(c => c !== code);
     else if (game.phase === 'pass') {
       if (selected.length === 3) { announce(t('limit3')); return; }
@@ -318,6 +383,6 @@
     const latest = read(KEY); if (!latest) return;
     stopTimer(); game = latest.game; selected = []; render();
   });
-  render(); save(); if (recovery) announce(recovery);
+  render(); save(); if (recovery) announce(recovery); if (!saved) animateDeal();
   if ('serviceWorker' in navigator && location.protocol !== 'file:') navigator.serviceWorker.register('service-worker.js').catch(()=>{});
 })();

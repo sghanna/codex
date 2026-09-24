@@ -6,7 +6,11 @@ A complete, ad-free Hearts game for one person and three computer opponents. Ope
 
 Choose three cards and confirm the pass. Review the three received cards, then continue. On your turn, select a highlighted legal card and press **Play card**. After the fourth card, the winner is highlighted. The cards briefly stay face up, then gather and slide into that player’s pile. Press **Next trick** when ready to continue; the final trick offers **See scores**.
 
-On your turn, cards that cannot legally be played are shaded gray; legal cards stay bright with a gold outline. All cards remain readable while passing, reviewing received cards, and waiting for opponents.
+On your turn, legal cards stay bright with a thick gold outline. Other cards are gray, with readable ranks and suits. The heading explains which suit to follow and counts legal choices. Tapping a gray card explains the rule. A sole legal card is selected automatically; you still press **Play card** to confirm it. Passing and waiting keep all cards readable.
+
+Four aligned player columns keep points taken this hand and match totals visible above the corresponding played cards. A moon watch names the only player who has taken points once they collect four hearts; it becomes an alert at eight hearts or 20 points. It shows hearts out of 13, queen ownership, and points out of 26. If points split between players, the watch clears. Pending complete tricks count immediately without changing the match total until the hand ends.
+
+A brief deal animation, collected-card movement, and a small emblem for a clean hand add motion and reward without flashing or confetti. Reduced Motion disables the new animations.
 
 **Menu** contains total scores, your current hand points, the last completed trick, settings, and a guarded New game action. Progress saves after every action. Settings include English, Spanish, Vietnamese, opponent speed, and optional soft sounds. The device language supplies the initial choice; `?lang=es` and `?lang=vi` also work.
 
@@ -26,7 +30,7 @@ The opponents use only their own hands and public play history. Their strategy i
 
 ## Files and saved games
 
-`engine.js` owns immutable rule transitions and save validation. `app.js` handles interaction, timers, rendering, sound, and storage. `i18n.js` contains translations. `deck.js` supplies the traced SVG card faces. The three CSS files cover the table, score/review screens, and responsive gameplay additions.
+`engine.js` owns immutable rule transitions and save validation. `app.js` handles interaction, timers, rendering, sound, and storage. `insights.js` derives rule guidance and moon progress from public play. `i18n.js` contains translations. `deck.js` supplies the traced SVG card faces. The three CSS files cover the table, score/review screens, and responsive gameplay additions.
 
 The new save format uses `codex-hearts-game-v2`, with the preceding valid save in `codex-hearts-game-v2-backup`. Restoration checks all 52 cards and replays the hand to reject impossible states. Invalid saves fall back to the backup; otherwise a new game starts. The earlier Hearts implementation's save is left untouched and is not imported. Preferences use `codex-hearts-settings-v2`. Storage failure is reported in Menu.
 
@@ -52,7 +56,7 @@ npm run test:browser
 
 Set `HEARTS_URL` to test another deployment. `PLAYWRIGHT_MODULE` can point to an existing Playwright module, and `CHROME_PATH` can select a local Chrome binary. Browser screenshots and metrics go to the ignored `.artifacts/` directory.
 
-Validation includes 120 seeded complete matches (1,321 hands), every pass direction, forced-play exceptions, moon scoring, ties, save validation, and card conservation. Browser checks exercise a full hand with real clicks, reloads, guarded restart, language persistence, paused opponents, offline play, damaged saves, and storage failure. Trick-animation tests cover every winner in portrait and landscape, completion without a test clock, paused menus, reloads during flight, rotation, Reduced Motion, and the final trick. The visual suite renders 14 game states at 390×740, 375×667, and 844×390 in all three languages, including moon/tie combinations and received cards in overlapping rows.
+Validation includes 120 seeded complete matches (1,321 hands), every pass direction, forced-play exceptions, moon scoring, ties, save validation, and card conservation. Browser checks exercise a full hand with real clicks, reloads, guarded restart, language persistence, paused opponents, offline play, damaged saves, and storage failure. Trick-animation tests cover every winner in portrait and landscape, completion without a test clock, paused menus, reloads during flight, rotation, Reduced Motion, and the final trick. Guidance checks cover legal-card contrast, sole-card confirmation, live scoring, moon alerts, and stable live announcements. The visual suite renders 17 game states at 390×740, 375×667, and 844×390 in all three languages, including moon/tie combinations, a moon in progress, and received cards in overlapping rows.
 
 These checks use desktop WebKit and Chrome. The release still needs a physical iPhone playtest with Mom, including Safari toolbars, Home Screen installation, and her preferred text/display settings.
 
@@ -60,4 +64,4 @@ These checks use desktop WebKit and Chrome. The release still needs a physical i
 
 Publish this version at `https://sghanna.github.io/codex/hearts/`. Keep its cache and storage names separate from other game versions.
 
-Current cache version: `codex-hearts-v4`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.
+Current cache version: `codex-hearts-v6`. After changing runtime assets, bump the version in `service-worker.js` and the asset query strings in `index.html`, then commit, push, and verify that GitHub Pages serves the new worker. Tests and development files are not precached.

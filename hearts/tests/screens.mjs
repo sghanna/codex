@@ -5,7 +5,7 @@ const fixtures=createFixtures();
 const browser=await webkit.launch();const report=[];
 try{
  for(const language of ['en','es','vi'])for(const [width,height] of [[390,740],[375,667],[844,390]]){
-  for(const fixture of ['pass','received','receivedTop','hold','play','late','trick','handEnd','moon','tie','moonTie','moonWin','win','lose']){
+  for(const fixture of ['pass','received','receivedTop','hold','play','late','trick','handEnd','moon','tie','moonTie','moonWin','win','lose','liveMoonwatch','liveMoondanger','liveMooncomplete']){
    const context=await browser.newContext({viewport:{width,height},deviceScaleFactor:2,isMobile:true,hasTouch:true,serviceWorkers:'block'});
    const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
    await page.addInitScript(({state,language,KEY})=>{
@@ -14,15 +14,18 @@ try{
    await page.goto(url);
    const metrics=await page.evaluate(()=>{
     const box=e=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right}};
+    const scoreFit=[...document.querySelectorAll('.seat')].every(e=>[...e.children].every(c=>c.getBoundingClientRect().width<=e.clientWidth+1));
     const results=document.getElementById('result-screen');
     const action=document.querySelector(results.hidden?'#primary-action':'.result-continue');
-    return {viewport:[innerWidth,innerHeight],scroll:[document.documentElement.scrollWidth,document.documentElement.scrollHeight],action:box(action),resultsScroll:results.hidden?null:[results.clientHeight,results.scrollHeight],cards:[...document.querySelectorAll('#hand .card')].map(box),text:document.body.innerText};
+    return {scoreFit,viewport:[innerWidth,innerHeight],scroll:[document.documentElement.scrollWidth,document.documentElement.scrollHeight],action:box(action),resultsScroll:results.hidden?null:[results.clientHeight,results.scrollHeight],cards:[...document.querySelectorAll('#hand .card')].map(box),text:document.body.innerText};
    });
    assert.deepEqual(errors,[]);
+   assert(metrics.scoreFit,JSON.stringify({language,width,height,fixture,reason:'score text overflows its player tile'}));
    assert.deepEqual(metrics.scroll,[width,height],JSON.stringify({language,width,height,fixture,metrics}));
    assert(metrics.action.bottom<=height+1,JSON.stringify({language,width,height,fixture,action:metrics.action}));
+   if(!metrics.resultsScroll)for(const card of metrics.cards)assert(card.bottom<=metrics.action.y+1,JSON.stringify({language,width,height,fixture,card,action:metrics.action}));
    if(width<500 && metrics.resultsScroll)assert(metrics.resultsScroll[1]<=metrics.resultsScroll[0]+1,JSON.stringify({language,width,height,fixture,scroll:metrics.resultsScroll}));
-   if(language==='en'||fixture==='moon'||fixture==='pass')await page.screenshot({path:`${artifacts}/game-${fixture}-${language}-${width}-${height}.png`});
+   if(language==='en'||fixture==='moon'||fixture==='pass'||fixture.startsWith('liveMoon'))await page.screenshot({path:`${artifacts}/game-${fixture}-${language}-${width}-${height}.png`});
    report.push({language,width,height,fixture,metrics});await context.close();
   }
  }

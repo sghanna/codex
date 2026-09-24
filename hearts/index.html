@@ -9,9 +9,9 @@
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-180.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <link rel="stylesheet" href="style.css?v=codex-hearts-v4">
-  <link rel="stylesheet" href="screens.css?v=codex-hearts-v4">
-  <link rel="stylesheet" href="game.css?v=codex-hearts-v4">
+  <link rel="stylesheet" href="style.css?v=codex-hearts-v6">
+  <link rel="stylesheet" href="screens.css?v=codex-hearts-v6">
+  <link rel="stylesheet" href="game.css?v=codex-hearts-v6">
 </head>
 <body>
 <main class="game" aria-label="Hearts game">
@@ -20,23 +20,48 @@
     <button class="pill menu-button" id="menu-button" aria-haspopup="dialog"><span data-i18n="menu">Menu</span> <svg width="16" height="16" viewBox="0 0 20 20" aria-hidden="true"><path d="M2 5h16M2 10h16M2 15h16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></button>
   </header>
 
-  <section class="table" aria-label="Opponents and current trick">
-    <div class="table-line" aria-hidden="true"></div>
-    <div class="seat seat-west"><span>Michael</span><strong data-total-for="Michael">0</strong></div>
-    <div class="seat seat-north"><span>Jerry</span><strong data-total-for="Jerry">0</strong></div>
-    <div class="seat seat-east"><span>Barbara</span><strong data-total-for="Barbara">0</strong></div>
-    <span class="trick-pile" data-pile-for="1" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="trick-pile" data-pile-for="2" aria-hidden="true"><i></i><i></i><i></i></span>
-    <span class="trick-pile" data-pile-for="3" aria-hidden="true"><i></i><i></i><i></i></span>
-    <div class="center-cards" id="center-cards" aria-label="Cards chosen to pass"></div>
-    <div class="table-status" id="table-status">Pass left to Michael</div>
+  <section class="table" aria-label="Scores and current trick">
+    <div class="score-rail" aria-label="Points this hand and match totals">
+      <div class="seat" role="group" data-player="1">
+        <span class="seat-name">Michael</span>
+        <div class="seat-hand"><strong data-hand-for="1">0</strong><span data-i18n="handShort">hand</span></div>
+        <div class="seat-total"><span data-i18n="total">Total</span> <strong data-total-for="Michael">0</strong></div>
+      </div>
+      <div class="seat" role="group" data-player="2">
+        <span class="seat-name">Jerry</span>
+        <div class="seat-hand"><strong data-hand-for="2">0</strong><span data-i18n="handShort">hand</span></div>
+        <div class="seat-total"><span data-i18n="total">Total</span> <strong data-total-for="Jerry">0</strong></div>
+      </div>
+      <div class="seat" role="group" data-player="3">
+        <span class="seat-name">Barbara</span>
+        <div class="seat-hand"><strong data-hand-for="3">0</strong><span data-i18n="handShort">hand</span></div>
+        <div class="seat-total"><span data-i18n="total">Total</span> <strong data-total-for="Barbara">0</strong></div>
+      </div>
+      <div class="seat you-score" role="group" data-player="0">
+        <span class="seat-name" data-i18n="you">You</span>
+        <div class="seat-hand"><strong data-hand-for="0">0</strong><span data-i18n="handShort">hand</span></div>
+        <div class="seat-total"><span data-i18n="total">Total</span> <strong data-total-for="You">0</strong></div>
+      </div>
+    </div>
+    <div class="trick-field">
+      <div class="table-line" aria-hidden="true"></div>
+      <span class="trick-pile" data-pile-for="1" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="trick-pile" data-pile-for="2" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="trick-pile" data-pile-for="3" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="trick-pile" data-pile-for="0" aria-hidden="true"><i></i><i></i><i></i></span>
+
+      <div class="center-cards" id="center-cards" aria-label="Cards chosen to pass"></div>
+      <div class="table-status" id="table-status">Pass left to Michael</div>
+    </div>
+    <aside class="hand-watch" id="hand-watch" aria-live="polite" aria-atomic="true"></aside>
   </section>
 
   <section class="hand-area" aria-labelledby="instruction">
     <div class="hand-heading">
       <h2 id="instruction">Choose 3 cards</h2>
-      <div class="you-score" aria-label="Your total score: 0"><span class="trick-pile your-pile" data-pile-for="0" aria-hidden="true"><i></i><i></i><i></i></span><span data-i18n="you">You</span> <strong data-total-for="You">0</strong></div>
+      <span class="legal-count" id="legal-count"></span>
     </div>
+    <p class="hand-note" id="hand-note"></p>
     <div class="hand" id="hand" aria-label="Your cards"></div>
   </section>
 
@@ -88,9 +113,10 @@
   <h3 data-i18n="installTitle">Play offline</h3><p data-i18n="installText"></p>
   <button class="dialog-action" data-close data-i18n="back">Back to the game</button>
 </dialog>
-<script src="deck.js?v=codex-hearts-v4"></script>
-<script src="engine.js?v=codex-hearts-v4"></script>
-<script src="i18n.js?v=codex-hearts-v4"></script>
-<script src="app.js?v=codex-hearts-v4"></script>
+<script src="deck.js?v=codex-hearts-v6"></script>
+<script src="engine.js?v=codex-hearts-v6"></script>
+<script src="insights.js?v=codex-hearts-v6"></script>
+<script src="i18n.js?v=codex-hearts-v6"></script>
+<script src="app.js?v=codex-hearts-v6"></script>
 </body>
 </html>

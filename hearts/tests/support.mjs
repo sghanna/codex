@@ -4,6 +4,7 @@ import {createRequire} from 'node:module';
 import assert from 'node:assert/strict';
 export const {webkit,chromium}=await import(process.env.PLAYWRIGHT_MODULE || 'playwright');
 export const E=createRequire(import.meta.url)('../engine.js');
+export const I=createRequire(import.meta.url)('../insights.js');
 export const url=process.env.HEARTS_URL || 'http://127.0.0.1:8767/hearts/';
 export const KEY='codex-hearts-game-v2';
 export const artifacts=fileURLToPath(new URL('../.artifacts/',import.meta.url));
@@ -41,6 +42,19 @@ const shooter=fixtures.moon.result.moon;
 const high=(shooter+1)%4;
 fixtures.moonTie=scored(fixtures.moon,[0,1,2,3].map(p=>p===shooter?26:p===high?90:0));
 fixtures.moonWin=scored(fixtures.moon,[0,1,2,3].map(p=>p===shooter?20:90));
+// Replay a real moon hand so the warning fixtures also pass full save validation.
+const complete=fixtures.moon;
+let replay={...clone(complete),phase:'play',hands:[0,1,2,3].map(p=>E.sort(complete.history.flatMap(t=>t.cards).filter(c=>c.player===p).map(c=>c.card))),history:[],trick:[],handPoints:[0,0,0,0],heartsBroken:false,result:null,scores:[...complete.result.before]};
+replay.turn=replay.hands.findIndex(h=>h.includes('2C'));
+for(const trick of complete.history){
+ for(const play of trick.cards){
+  replay=E.play(replay,play.player,play.card);
+  const moon=I.summarize(replay).moon;
+  if(['watch','danger','complete'].includes(moon))fixtures['liveMoon'+moon] ||= clone(replay);
+ }
+ replay=E.collect(replay);
+}
+assert(fixtures.liveMoonwatch && fixtures.liveMoondanger && fixtures.liveMooncomplete);
 assert(Object.values(fixtures).every(E.validate));
 return fixtures;
 }

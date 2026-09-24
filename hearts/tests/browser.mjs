@@ -24,8 +24,8 @@ try{
    await page.clock.runFor(1600);
   }else if(s.phase==='play'){
    const legal=E.legalCards(s,0),off=s.hands[0].find(c=>!legal.includes(c));
-   if(off){const b=await page.locator(`[data-card="${off}"]`).boundingBox();await page.mouse.click(b.x+20,b.y+20);assert(await page.locator('#primary-action').isDisabled());}
-   const card=E.choosePlay(E.viewFor(s,0));await page.locator(`[data-card="${card}"]`).click({position:{x:25,y:20}});await page.locator('#primary-action').click();
+   if(off){const before=await read();const b=await page.locator(`[data-card="${off}"]`).boundingBox();await page.mouse.click(b.x+20,b.y+20);assert.deepEqual(await read(),before);}
+   const card=E.choosePlay(E.viewFor(s,0));const button=page.locator(`[data-card="${card}"]`);if(await button.getAttribute('aria-pressed')!=='true')await button.click({position:{x:25,y:20}});await page.locator('#primary-action').click();
   }else if(s.phase==='trick-end'){
    if(!restoreChecked){await page.reload();assert.equal((await read()).game.phase,'trick-end');await page.locator('#menu-button').click();await page.locator('#last-trick-button').click();assert.equal(await page.locator('.review-card').count(),4);await page.locator('#last-trick-dialog [data-close]').click();restoreChecked=true;}
    await page.clock.runFor(2400);
