@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en" data-layout="current">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none'">
+  <title>Hearts · Compare card shading</title>
+  <link rel="stylesheet" href="../../hearts/style.css">
+  <link rel="stylesheet" href="../../hearts/game.css">
+  <link rel="stylesheet" href="review.css">
+</head>
+<body>
+<main class="review">
+  <header class="review-heading">
+    <a href="../../hearts/">Back to Hearts</a>
+    <p class="eyebrow">Codex Hearts · Card visibility</p>
+    <h1>Keep the whole hand readable.</h1>
+    <p>Six black overlays, from 20% to 70%. The card artwork underneath stays at full opacity and retains its red and black suits. Playable cards have their ordinary appearance.</p>
+    <p class="try-note">The same hand appears in every option. Follow clubs: 3♣, 7♣, 10♣, and Q♣ can be selected. Tap a club to compare the magenta selection. These samples do not change your saved game.</p>
+    <div class="review-controls"><label>Card spacing <select id="spacing"><option value="overlap">Short screen · overlapping rows</option><option value="spread">Full cards · spaced rows</option></select></label><button id="clear-selection" type="button">Clear selection</button><a href="#contrast-notes">Contrast measurements ↓</a></div>
+  </header>
+  <section class="options" id="options" aria-label="Six overlay options"></section>
+  <p class="sr-only" id="review-status" role="status" aria-live="polite"></p>
+  <section class="contrast-notes" id="contrast-notes" aria-labelledby="contrast-title">
+    <p class="eyebrow">Recommendation</p>
+    <h2 id="contrast-title">Start with 20%.</h2>
+    <p>It gives the unplayable cards a quieter appearance while preserving the most detail of these six choices. At 30% the separation is stronger, but the red cards are harder to read. I would avoid 50–70% for Mom: the red suits lose too much contrast. This is my design judgment, not a WCAG-approved opacity.</p>
+    <div class="table-wrap"><table><caption>Calculated contrast within the shaded card</caption><thead><tr><th scope="col">Black overlay</th><th scope="col">Red ink</th><th scope="col">Black ink</th><th scope="col">Reading tradeoff</th></tr></thead><tbody id="contrast-rows"></tbody></table></div>
+    <p class="method">Conservative calculations using this deck’s red (#c62f27), black (#1b0a0a), and darkest card-face color (#ebebe5). The black overlay is composited over both the ink and the paper before calculating WCAG relative luminance. Ratios are rounded for display; the lighter parts of the card have higher contrast. These figures assess ink against paper, not the difference between playable and unplayable cards, and are not a complete accessibility audit.</p>
+    <h3>What WCAG says</h3>
+    <ul>
+      <li>WCAG sets contrast ratios, not opacity levels: <strong>4.5:1 for ordinary text</strong> and <strong>3:1 for large text</strong> at AA. <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html">SC 1.4.3</a></li>
+      <li>Meaningful graphics, such as suit symbols, generally need <strong>3:1 against adjacent colors</strong>. <a href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html">SC 1.4.11</a></li>
+      <li>Inactive controls have contrast exceptions. That does not make faint cards a good choice here: the hand still contains information needed to plan future plays. I would use the readable-content targets for this decision.</li>
+      <li>For stronger readability, AAA raises the text targets to <strong>7:1 for ordinary text and 4.5:1 for large text</strong>. Even 20% falls short of 4.5:1 for red ink over the darker paper. A lighter overlay or darker red ink would provide more margin. <a href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html">SC 1.4.6</a></li>
+      <li>Keep the written instruction and playable count. The shading should support the rule explanation, so distinguishing the cards does not depend on subtle color differences alone. <a href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html">SC 1.4.1</a></li>
+    </ul>
+    <p>Compare at Mom’s usual screen brightness and reading distance. In particular, check whether she can still distinguish the shaded Q, J, 10, hearts, and diamonds comfortably.</p>
+  </section>
+</main>
+<script src="../../hearts/deck.js"></script>
+<script src="review.js"></script>
+</body>
+</html>
