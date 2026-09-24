@@ -33,6 +33,7 @@
   }
   if (forcedCard()) selected = [forcedCard()];
   document.documentElement.dataset.layout = 'overlap';
+  const touchControls = HeartsTouch.install(document.querySelector('.game'),() => [game,selected.join(','),preferences.tapToPlay]);
 
   function save() {
     try {
@@ -437,6 +438,7 @@
     $('result-screen').querySelector('.result-continue').addEventListener('click',() => commit(over ? E.newGame(random) : E.nextHand(game,random)));
   }
   function render() {
+    touchControls.cancel();
     const previousReceipt = receipt?.state === game ? receipt : null;
     const receivedDone = previousReceipt && previousReceipt.stage !== 'waiting';
     const receivedArrived = previousReceipt?.arrived || previousReceipt?.stage === 'moving';
@@ -494,7 +496,7 @@
     else if (game.phase === 'trick-end' && collection?.stage === 'done') commit(E.collect(game));
     else if (game.phase === 'play' && game.turn === 0 && selected.length === 1) commit(E.play(game,0,selected[0]));
   });
-  function openDialog(id) { stopTimer(); pauseAdvance(); pauseCollection(); pauseReceipt(); $(id).showModal(); }
+  function openDialog(id) { touchControls.cancel(); stopTimer(); pauseAdvance(); pauseCollection(); pauseReceipt(); $(id).showModal(); }
   function showLastTrick() {
     const trick = currentTrick(); if (!trick) return;
     if ($('menu-dialog').open) $('menu-dialog').close();
