@@ -4,6 +4,8 @@
 
 The Hearts game is in `hearts/`. Its [README](hearts/README.md) covers gameplay, development, testing, and releases. GitHub Pages publishes the `main` branch from this repository’s root.
 
+[Play Word Garden](https://sghanna.github.io/codex/word-garden/) — 36 original word puzzles, tap or swipe controls, free hints, saved progress, and offline installation. Includes the [project README](word-garden/README.md), [reusable build prompt](word-garden/BUILD-PROMPT.md), and [Wordscapes research](word-garden/RESEARCH.md).
+
 [Compare card-shading options](https://sghanna.github.io/codex/reviews/card-opacity/) — six black overlays, an interactive sample hand, and WCAG contrast measurements. This standalone review does not change the game or its saved progress.
 
 [Compare three darker reds](https://sghanna.github.io/codex/reviews/red-ink/) — full-brightness and shaded samples, with the earlier 20% reference overlay.

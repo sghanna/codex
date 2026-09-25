@@ -1,0 +1,8 @@
+# Authored common additions absent from the ESDB American Hunspell entries.
+CARB
+HER
+LED
+PER
+REINS
+TEN
+TENS
