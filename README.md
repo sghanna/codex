@@ -1,5 +1,7 @@
 # Codex games
 
+[Read Mom News](https://sghanna.github.io/codex/mom-news/reader/) — 20 selections with photos, expandable reading, saved stories, a daily spinach lunch, and one viewing pick. Install it from Safari on iPhone. News editions are prepared manually; automatic overnight updates are still planned.
+
 [Play Hearts](https://sghanna.github.io/codex/hearts/)
 
 The Hearts game is in `hearts/`. Its [README](hearts/README.md) covers gameplay, development, testing, and releases. GitHub Pages publishes the `main` branch from this repository’s root.
