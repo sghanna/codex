@@ -1,6 +1,6 @@
 # Codex games
 
-[Read Mom News](https://sghanna.github.io/codex/mom-news/reader/) — 20 selections with photos, expandable reading, saved stories, a daily spinach lunch, and one viewing pick. Install it from Safari on iPhone. News editions are prepared manually; automatic overnight updates are still planned.
+[Read Mom News](https://sghanna.github.io/codex/mom-news/reader/) — 20 selections with photos, expandable reading, saved stories, a daily spinach lunch, and one viewing pick. Install it from Safari on iPhone. Fresh editions are scheduled for 2 a.m. Pacific, with catch-up after sleep; saved stories carry forward.
 
 [Play Hearts](https://sghanna.github.io/codex/hearts/)
 

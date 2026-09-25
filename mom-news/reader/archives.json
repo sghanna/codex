@@ -1,0 +1,19 @@
+{
+  "editions": [
+    {
+      "id": "2026-09-25-midday",
+      "date": "2026-09-25",
+      "url": "edition-2026-09-25-midday.html"
+    },
+    {
+      "id": "2026-09-25-first-edition",
+      "date": "2026-09-25",
+      "url": "edition-2026-09-25-first.html"
+    },
+    {
+      "id": "2026-09-25-evening",
+      "date": "2026-09-25",
+      "url": "edition-2026-09-25-evening.html"
+    }
+  ]
+}
