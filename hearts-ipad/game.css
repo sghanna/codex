@@ -1,0 +1,282 @@
+/* Four aligned players: hand points, match totals, then their played cards. */
+:root:not([data-layout="current"]) {
+  --hand-overlap:clamp(-12px, calc(34px + (740px - 100dvh) * .3), calc(var(--card-height) - 50px));
+  --row-step:calc(var(--card-height) - var(--hand-overlap));
+}
+.game { padding:max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom)); }
+.header { height:44px; flex-basis:44px; padding:0; margin-bottom:8px; }
+.crest { width:32px; height:32px; }
+h1 { font-size:28px; }
+.table { display:flex; flex-direction:column; min-height:calc(var(--card-height) + 166px); margin:0 0 8px; }
+.score-rail { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; flex:none; }
+.seat { position:relative; inset:auto; transform:none; width:auto; min-width:0; display:flex; flex-direction:column; gap:0; padding:5px 0; border:2px solid #718873; border-radius:12px; background:#102c21; color:#fff7df; font-size:18px; line-height:22px; box-shadow:none; white-space:nowrap; }
+.seat-name { max-width:100%; padding:0 2px; overflow:hidden; text-overflow:ellipsis; font-size:18px; font-weight:750; }
+.message-name { display:inline-block; max-width:12ch; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; vertical-align:bottom; }
+.seat-hand { display:flex; align-items:baseline; gap:2px; line-height:29px; }
+.seat-hand strong { font-size:26px; font-weight:850; color:#fff5d1; font-variant-numeric:tabular-nums; }
+.seat-hand span { font-size:16px; font-weight:600; }
+.seat-total { font-size:16px; line-height:21px; color:#e6d4ae; }
+.seat .seat-total strong { font-size:18px; font-weight:750; color:inherit; }
+.seat.you-score { background:#203d2a; border-color:#e4c783; }
+.seat.is-turn { border-color:#fff0a8; box-shadow:0 0 0 1px #fff0a8,0 0 12px #f1d08955; }
+.seat.is-winner { border-color:#ffe0a0; background:#354829; box-shadow:0 0 12px #f1d08966; }
+.seat.moon-holder { border-color:#f4c677; }
+.trick-field { position:relative; display:flex; flex:1; flex-direction:column; min-height:calc(var(--card-height) + 28px); padding-top:4px; }
+.table-line { inset:3px 0 2px; border-radius:14px; border-color:#bca66e3b; }
+.table-line::after { border-radius:10px; }
+.center-cards { position:relative; inset:auto; flex:1; min-height:var(--card-height); display:flex; align-items:center; justify-content:center; gap:14px; }
+.table.play .center-cards { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; align-items:center; }
+.trick-slot { display:grid; place-items:center; position:relative; min-height:var(--card-height); }
+.empty-trick { width:var(--card-width); height:var(--card-height); border:1px dashed #d8c18b44; border-radius:7px; }
+.table.play .trick-card { position:relative; inset:auto; transform:none; width:var(--card-width); height:var(--card-height); align-self:auto; }
+.table-status { position:relative; inset:auto; flex-shrink:0; min-height:25px; font-size:18px; line-height:23px; padding-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.table.play .table-status { color:#fff4d5; }
+.table-status.clean-trick { color:#ffe4a0; }
+.hand-watch { flex:none; min-height:45px; padding:5px 8px; border:1px solid #d1be892f; border-radius:10px; background:#0a231b; color:#e8dcbc; font-size:18px; line-height:22px; display:flex; flex-direction:column; justify-content:center; }
+.hand-watch .watch-title { font-size:18px; font-weight:750; display:block; color:#fff2c7; }
+.hand-watch .watch-title:has(.message-name) { display:flex; align-items:center; gap:.25em; white-space:nowrap; }
+.hand-watch .message-name { flex:0 1 auto; min-width:0; }
+.watch-points { margin-left:auto; white-space:nowrap; font-size:20px; }
+.hand-watch .watch-detail { font-size:17px; line-height:21px; }
+.hand-watch.is-watch { border:2px solid #e2c07a; background:#343623; padding:5px 8px; }
+.hand-watch.is-danger { border-color:#ffe5a3; background:#53421d; }
+.watch-icon { width:22px; height:22px; flex:0 0 22px; }
+.moon-meter { height:4px; background:#fff3cd33; border-radius:3px; margin-top:4px; overflow:hidden; }
+.moon-meter span { height:100%; display:block; background:#ffe5a3; border-radius:3px; }
+.hand-cue { padding:3px 8px; margin-bottom:5px; border-radius:9px; }
+.hand-heading { height:25px; padding:0; }
+.hand-heading h2 { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:21px; line-height:25px; }
+.legal-count { font-size:18px; line-height:22px; color:#ffdfa1; font-weight:750; white-space:nowrap; }
+.hand-note { min-height:22px; margin:0; color:#eee2c2; font-size:18px; line-height:22px; }
+/* Option F: blue felt marks the entire hand for as long as it is your turn. */
+.hand-area.is-your-turn { background:#12476a; border-radius:10px; box-shadow:0 0 0 3px #91d3ff; }
+.hand-area.is-your-turn .hand-cue { background:#12476a; }
+.hand-area.is-your-turn .hand-cue :is(h2,.hand-note,.legal-count) { color:#fff; text-shadow:none; }
+:root:not([data-layout="current"]) .hand { height:calc(var(--card-height) * var(--row-count,3) - var(--row-gaps,2) * var(--hand-overlap)); gap:0; }
+:root:not([data-layout="current"]) .hand-row { position:relative; isolation:isolate; }
+:root:not([data-layout="current"]) .hand-row + .hand-row { margin-top:calc(-1 * var(--hand-overlap)); }
+:root:not([data-layout="current"]) .hand-row:nth-child(1) { z-index:1; }
+:root:not([data-layout="current"]) .hand-row:nth-child(2) { z-index:2; }
+:root:not([data-layout="current"]) .hand-row:nth-child(3) { z-index:3; }
+.card.unplayable { cursor:not-allowed; }
+.card.unplayable > svg, .card.prior-card > svg { filter:none; opacity:1; }
+/* Preserve full-color card artwork beneath the chosen 30% black overlay. */
+.card.unplayable::after, .card.prior-card::after { content:""; position:absolute; inset:0; border-radius:inherit; background:#000; opacity:.3; pointer-events:none; box-shadow:none; }
+.card[aria-pressed="true"] { outline:4px solid #ff00ff; transform:translateY(-5px); box-shadow:0 0 12px 3px #ff00ff66,0 5px 5px #0006; }
+.card.received::after { display:none; }
+.card.receipt-pending { visibility:hidden; }
+.reviewing-received .table-status { order:-1; min-height:24px; line-height:22px; padding:0; }
+.reviewing-received .pass-slot::after { display:none; }
+.receipt-summary { display:flex; flex-direction:column; align-items:center; gap:8px; font-size:23px; font-weight:750; }
+.receipt-summary strong { font-size:30px; word-spacing:15px; }
+.receipt-flight { position:fixed; inset:0; pointer-events:none; z-index:10; }
+.receipt-flight-card { position:absolute; border-radius:6px; box-shadow:0 4px 4px #0005; }
+.receipt-flight-card svg { display:block; width:100%; height:100%; }
+:root:not([data-layout="current"]) .hand-row:not(:last-child) .card[aria-pressed="true"] .check { top:calc(var(--row-step) - 20px); bottom:auto; width:18px; height:18px; }
+:root:not([data-layout="current"]) .hand-row:not(:last-child) .check svg { width:12px; height:12px; }
+.action-area { height:64px; flex-basis:64px; padding-top:8px; }
+.primary-action { gap:7px; font-size:21px; }
+.primary-action .action-detail { padding-left:7px; font-size:18px; }
+.primary-action .action-arrow { flex:0 0 19px; }
+dialog { max-height:calc(100vh - 24px); max-height:calc(100dvh - 24px); overflow-y:auto; }
+.setting { display:grid; gap:8px; margin:20px 0; font-size:19px; font-weight:700; }
+.setting select { appearance:none; width:100%; min-height:48px; padding:10px 14px; color:var(--cream); background:#092419; border:2px solid var(--brass); border-radius:12px; font:inherit; }
+#settings-dialog h3 { font-size:21px; margin:24px 0 0; }
+#settings-dialog p { font-size:18px; }
+.review-play figcaption { font-size:17px; }
+.result-emblem { width:30px; height:30px; vertical-align:-3px; margin-right:8px; color:#f5d88e; }
+.trick-pile { position:absolute; width:32px; height:22px; visibility:hidden; pointer-events:none; z-index:1; }
+.trick-pile.has-tricks, .trick-pile.is-receiving { visibility:visible; }
+.trick-pile.is-receiving { filter:drop-shadow(0 0 7px #ffe0a0); }
+.trick-pile i, .flight-back { position:absolute; inset:0; border:2px solid #e4c783; border-radius:4px; background:#742038; box-shadow:inset 0 0 0 2px #361323, 0 2px 3px #0008; }
+.trick-pile i:nth-child(1) { transform:translate(3px,5px) rotate(7deg); }
+.trick-pile i:nth-child(2) { transform:translate(-2px,2px) rotate(-7deg); }
+.trick-pile i::after, .flight-back::after { content:""; position:absolute; width:7px; height:7px; left:calc(50% - 3.5px); top:calc(50% - 3.5px); border:1px solid #ffdf9e; transform:rotate(45deg); }
+.your-pile { position:relative; flex:0 0 32px; margin-right:5px; }
+.trick-flight { position:fixed; inset:0; pointer-events:none; z-index:10; }
+.trick-flight-card { position:absolute; border-radius:6px; transform-origin:center; filter:drop-shadow(0 4px 3px #0006); }
+.flight-face, .flight-back { position:absolute; inset:0; }
+.flight-face svg { display:block; width:100%; height:100%; }
+.flight-back { opacity:0; border-width:3px; border-radius:6px; }
+.center-cards.trick-gathered .trick-card { visibility:hidden; }
+.table .center-cards { z-index:2; }
+
+/* Captured cards stay beneath the matching player column. */
+.trick-pile { top:6px; }
+@media (min-width:650px) and (max-height:500px) {
+  :root { --card-width:60px; --card-height:90px; }
+  :root:not([data-layout="current"]) { --hand-overlap:40px; --row-step:50px; }
+  .game { max-width:none; padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left)); display:grid; grid-template-columns:minmax(325px,1fr) minmax(350px,1.08fr); grid-template-rows:44px 1fr 56px; gap:8px 20px; }
+  .header { grid-column:1 / -1; height:44px; margin:0; padding:0; }
+  .table { grid-column:1; grid-row:2 / 4; margin:0; min-height:250px; }
+  .hand-area { grid-column:2; grid-row:2; align-self:end; }
+  .action-area { grid-column:2; grid-row:3; padding-top:0; height:56px; }
+  .result-screen { grid-column:1 / -1; grid-row:2 / 4; padding-top:0; display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 1fr auto; gap:8px 28px; }
+  .result-heading { grid-column:1; grid-row:1; }
+  .result-notice, .game-end-reason { grid-column:1; grid-row:2; align-self:start; }
+  .result-scores { grid-column:2; grid-row:1 / 4; align-self:start; max-width:none; }
+  .result-footer { grid-column:1; grid-row:3; width:100%; }
+}
+
+/* Selected A + C: public heart ownership below the cards, moon status by the hand. */
+.tracking-points .table { min-height:0; flex:1 0 auto; margin-bottom:4px; }
+.tracking-points .trick-field { min-height:0; flex:1 0 auto; }
+.tracking-points .seat { padding:2px 0; }
+.tracking-points .seat-hand { line-height:24px; }
+.tracking-points .seat-hand strong { font-size:23px; }
+.tracking-points .seat-total { line-height:19px; }
+.ownership-row { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:4px; flex:none; margin:3px 0 5px; }
+.ownership { min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px solid #708b78; border-radius:8px; padding:2px 0; color:#e6eddf; background:#133226; }
+.ownership.has-points { background:#fff4dc; border-color:#f4d08e; color:#192d21; }
+.owner-name { position:absolute; clip:rect(0,0,0,0); width:1px; height:1px; overflow:hidden; }
+.owner-cards { display:flex; align-items:center; justify-content:center; gap:3px; }
+.ownership strong { font-size:26px; line-height:29px; white-space:nowrap; }
+.heart-symbol { color:#961c18; }
+.ownership:not(.has-points) .heart-symbol { color:#e6eddf; }
+.queen-token { font-size:16px; line-height:20px; font-weight:800; white-space:nowrap; }
+.tracking-points #table-status { position:absolute; clip:rect(0,0,0,0); width:1px; height:1px; min-height:0; overflow:hidden; }
+.tracking-points .hand-watch { min-height:0; padding:5px 8px; gap:2px; border:2px solid #f5d28a; border-radius:11px; background:#fff4dc; color:#192d21; }
+.tracking-points .hand-watch .watch-title { font-size:22px; line-height:25px; color:#192d21; }
+.tracking-points .hand-watch .watch-detail,.watch-advice { font-size:17px; line-height:21px; }
+.moon-count { font-weight:750; }
+.tracking-points .hand-watch.moon-blocked { background:#d7f1df; border-color:#81c89b; }
+.heart-strip { display:flex; justify-content:space-between; font-size:24px; line-height:26px; color:#5c6c61; }
+.heart-strip .taken { color:#961c18; }
+.tracking-points .hand-cue { margin-bottom:3px; }
+@media (max-width:649px) and (max-height:740px) {
+  .tracking-points .header { margin-bottom:4px; }
+  .tracking-points.full-hand .heart-strip { display:none; }
+  .tracking-points.full-hand { --hand-overlap:calc(var(--card-height) - 44px); --row-step:44px; }
+}
+@media (min-width:650px) and (max-height:500px) {
+  .tracking-points .table { margin-bottom:0; }
+  .tracking-points .ownership-row { margin:2px 0 3px; }
+  .tracking-points .hand-watch { padding:4px 8px; gap:1px; }
+  .tracking-points .hand-watch .watch-title { font-size:21px; line-height:23px; }
+  .tracking-points .heart-strip { font-size:21px; line-height:22px; }
+}
+/* The winner heading and collection animation explain a completed trick. */
+.trick-complete .hand-note { position:absolute; clip:rect(0,0,0,0); width:1px; height:1px; min-height:0; overflow:hidden; }
+@media (max-width:649px) and (max-height:740px) {
+  /* Keep the moon name and numeric progress beside a full three-row hand. */
+  .tracking-points.full-hand .watch-advice { position:absolute; clip:rect(0,0,0,0); width:1px; height:1px; overflow:hidden; }
+}
+@media (max-width:649px) and (max-height:700px) {
+  .tracking-points .hand-watch { padding:3px 8px; gap:1px; }
+  .tracking-points .heart-strip { font-size:23px; line-height:23px; }
+  .tracking-points .ownership-row { margin-bottom:3px; }
+  .tracking-points .hand-cue { padding-top:2px; padding-bottom:2px; }
+}
+
+/* Mid-size windows keep the familiar three rows, with room for larger cards. */
+@media (min-width:500px) and (max-width:699px) and (min-height:541px) {
+  :root { --card-width:clamp(72px, calc((100vw - 80px) / 6), 86px); --card-height:calc(var(--card-width) * 1.5); }
+  :root:not([data-layout="current"]) { --table-card-width:var(--card-width); --hand-overlap:clamp(30px, calc((940px - 100vh) * .28 + 30px), 49px); --row-step:calc(var(--card-height) - var(--hand-overlap)); }
+  .game { max-width:none; padding:12px 16px; }
+  .header { height:50px; flex-basis:50px; }
+  .table { min-height:0; flex:1 1 auto; }
+  .tracking-points .table, .tracking-points .trick-field { flex:1 1 auto; }
+  .seat { padding:5px 0; }
+  .trick-field { min-height:0; }
+  .center-cards { min-height:var(--card-height); }
+  .hand-watch { margin-bottom:5px; }
+  .action-area { height:68px; flex-basis:68px; }
+}
+
+/* A portrait iPad is one broad table above a two-row, full-size hand. */
+@media (min-width:700px) and (min-height:540px) and (orientation:portrait) {
+  :root { --hand-columns:7; --card-width:clamp(88px, calc((100vw - 124px) / 7), 96px); --card-height:calc(var(--card-width) * 1.5); }
+  :root:not([data-layout="current"]) { --table-card-width:var(--card-width); --hand-overlap:clamp(-12px, calc((980px - 100vh) * .35), 44px); --row-step:calc(var(--card-height) - var(--hand-overlap)); }
+  .game { width:100%; max-width:920px; padding:14px 24px 16px; }
+  .header { height:58px; flex-basis:58px; margin-bottom:10px; }
+  h1 { font-size:36px; gap:12px; }
+  .crest { width:42px; height:42px; }
+  .pill { min-height:48px; padding:0 19px; font-size:21px; }
+  .table { min-height:0; flex:1 1 auto; margin-bottom:8px; }
+  .tracking-points .table, .tracking-points .trick-field { flex:1 1 auto; }
+  .score-rail, .ownership-row { gap:8px; }
+  .seat, .tracking-points .seat { min-height:91px; padding:7px 3px; border-radius:15px; }
+  .seat-name { font-size:22px; line-height:26px; }
+  .seat-hand, .tracking-points .seat-hand { line-height:31px; }
+  .seat-hand strong, .tracking-points .seat-hand strong { font-size:30px; }
+  .seat-hand span { font-size:18px; }
+  .seat-total { font-size:18px; line-height:24px; }
+  .seat .seat-total strong { font-size:21px; }
+  .trick-field { min-height:0; padding-top:8px; }
+  .table-line { inset:5px 0 3px; border-radius:22px; }
+  .table-line::after { border-radius:18px; }
+  .center-cards { min-height:var(--card-height); gap:20px; }
+  .table.play .center-cards { gap:8px; }
+  .pass-slot { border-radius:9px; font-size:32px; }
+  .empty-trick { border-radius:9px; }
+  .ownership-row { margin:5px 0 7px; }
+  .ownership { min-height:50px; border-radius:11px; }
+  .ownership strong { font-size:30px; line-height:34px; }
+  .queen-token { font-size:18px; line-height:22px; }
+  .hand-watch { min-height:60px; padding:9px 14px; margin-bottom:4px; border-radius:13px; }
+  .tracking-points .hand-watch { padding:9px 14px; gap:3px; }
+  .tracking-points .hand-watch .watch-title { font-size:23px; line-height:28px; }
+  .tracking-points .hand-watch .watch-detail, .watch-advice { font-size:19px; line-height:24px; }
+  .heart-strip { font-size:27px; line-height:29px; }
+  .hand-cue, .tracking-points .hand-cue { padding:6px 10px; margin-bottom:7px; }
+  .hand-heading { height:31px; }
+  .hand-heading h2 { font-size:26px; line-height:30px; }
+  .legal-count { font-size:21px; }
+  .hand-note { min-height:26px; font-size:20px; line-height:25px; }
+  .hand-row { gap:7px; }
+  .card { border-radius:8px; }
+  .card[aria-pressed="true"] { transform:translateY(-8px); }
+  .action-area { height:72px; flex-basis:72px; padding-top:7px; }
+  .primary-action { font-size:26px; border-radius:19px; }
+  .primary-action .action-detail { font-size:21px; }
+}
+@media (min-width:700px) and (min-height:540px) and (orientation:portrait) and (max-height:920px) {
+  .tracking-points .heart-strip, .tracking-points .watch-advice { display:none; }
+  .tracking-points .hand-watch { padding:6px 12px; gap:1px; }
+  .hand-watch { margin-bottom:2px; }
+}
+
+/* A short, wide iPad gives equal attention to the table and reachable hand. */
+@media (min-width:700px) and (min-height:540px) and (orientation:landscape) {
+  :root { --card-width:clamp(62px, calc((100vw - 114px) / 10), 92px); --card-height:calc(var(--card-width) * 1.5); }
+  :root:not([data-layout="current"]) { --table-card-width:var(--card-width); --hand-overlap:clamp(25px, calc((768px - 100vh) * .18 + 25px), 56px); --row-step:calc(var(--card-height) - var(--hand-overlap)); }
+  .game { width:100%; max-width:none; padding:12px max(16px, env(safe-area-inset-right)) 12px max(16px, env(safe-area-inset-left)); display:grid; grid-template-columns:minmax(0,.97fr) minmax(0,1.08fr); grid-template-rows:52px minmax(0,1fr) 68px; gap:8px 20px; }
+  .header { grid-column:1 / -1; height:52px; margin:0; }
+  h1 { font-size:31px; }
+  .crest { width:38px; height:38px; }
+  .pill { min-height:46px; font-size:20px; }
+  .table { grid-column:1; grid-row:2 / 4; min-width:0; min-height:0; margin:0; }
+  .tracking-points .table, .tracking-points .trick-field { flex:1 1 auto; }
+  .score-rail, .ownership-row { gap:5px; }
+  .seat, .tracking-points .seat { padding:5px 1px; }
+  .seat-name { font-size:19px; line-height:23px; }
+  .seat-hand strong, .tracking-points .seat-hand strong { font-size:27px; }
+  .seat-total { font-size:16px; }
+  .seat .seat-total strong { font-size:19px; }
+  .trick-field { min-height:0; }
+  .center-cards { min-height:var(--card-height); }
+  .table.play .center-cards { gap:3px; }
+  .ownership-row { margin:3px 0 4px; }
+  .ownership { min-height:43px; }
+  .ownership strong { font-size:25px; }
+  .queen-token { font-size:15px; }
+  .hand-watch { margin-top:3px; }
+  .tracking-points .hand-watch { padding:5px 8px; gap:1px; }
+  .tracking-points .hand-watch .watch-title { font-size:21px; line-height:24px; }
+  .tracking-points .hand-watch .watch-detail, .watch-advice { font-size:17px; line-height:20px; }
+  .heart-strip { font-size:21px; line-height:23px; }
+  .hand-area { grid-column:2; grid-row:2; min-width:0; align-self:end; }
+  .hand-cue { margin-bottom:6px; padding:4px 8px; }
+  .hand-heading { height:27px; }
+  .hand-heading h2 { font-size:23px; line-height:27px; }
+  .hand-note { min-height:23px; font-size:18px; line-height:23px; }
+  .hand-row { gap:6px; }
+  .action-area { grid-column:2; grid-row:3; height:68px; padding-top:0; }
+  .primary-action { font-size:24px; }
+  .result-screen { grid-column:1 / -1; grid-row:2 / 4; width:min(100%,780px); justify-self:center; }
+}
+@media (min-width:700px) and (min-height:540px) and (max-height:650px) and (orientation:landscape) {
+  .tracking-points .heart-strip, .tracking-points .watch-advice { display:none; }
+  .tracking-points .hand-watch { padding:4px 7px; }
+  .hand-watch { font-size:16px; line-height:19px; }
+}
