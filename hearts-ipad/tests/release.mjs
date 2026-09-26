@@ -7,6 +7,7 @@ const E=createRequire(import.meta.url)('../engine.js');
 const base=process.env.HEARTS_BASE_URL||'http://127.0.0.1:8790/';
 const originalURL=new URL('hearts/',base).href,previewURL=new URL('hearts-ipad/',base).href;
 const KEY='codex-ipad-hearts-game-v2',PREFS='codex-ipad-hearts-settings-v2';
+const previewCache=(await fs.readFile(new URL('../service-worker.js',import.meta.url),'utf8')).match(/const CACHE = '([^']+)'/)[1];
 const originalKeys=['codex-hearts-game-v2','codex-hearts-game-v2-backup','codex-hearts-settings-v2'];
 const output=new URL('../.artifacts/',import.meta.url);
 await fs.mkdir(output,{recursive:true});
@@ -70,7 +71,7 @@ try{
   assert((await page.evaluate(()=>navigator.serviceWorker.controller.scriptURL)).endsWith('/hearts-ipad/service-worker.js'));
   assert.deepEqual(await originalStorage(page),oldStorage);
   const allCaches=await page.evaluate(()=>caches.keys());
-  assert(allCaches.includes('codex-ipad-hearts-v1'));
+  assert(allCaches.includes(previewCache));
   for(const cache of mainCaches)assert(allCaches.includes(cache),'Preview deleted an original Hearts cache');
   const previewBefore=await read(page);
   await context.setOffline(true);await page.reload();
@@ -89,10 +90,10 @@ try{
   await context.setOffline(false);
   await page.evaluate(async()=>{const r=await navigator.serviceWorker.getRegistration();await r.unregister();});
   await page.goto(originalURL);await page.evaluate(()=>navigator.serviceWorker.ready);await page.reload();
-  assert((await page.evaluate(()=>caches.keys())).includes('codex-ipad-hearts-v1'),'Original cleanup deleted preview cache');
+  assert((await page.evaluate(()=>caches.keys())).includes(previewCache),'Original cleanup deleted preview cache');
   await context.setOffline(true);await page.goto(previewURL);
   assert.deepEqual(await read(page),previewAfter);
-  report.cases.push({kind:'offline-isolation',originalCaches:mainCaches,previewCache:'codex-ipad-hearts-v1',result:'pass'});
+  report.cases.push({kind:'offline-isolation',originalCaches:mainCaches,previewCache,result:'pass'});
   await context.close();
 }finally{await chrome.close();}
 assert.deepEqual(errors,[]);

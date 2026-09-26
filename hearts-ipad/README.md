@@ -8,9 +8,11 @@ Portrait uses larger cards and two balanced rows; landscape places the table bes
 
 This build has its own saved game, preferences, and offline cache. Testing it starts separate progress and does not import or overwrite the original game's save. The Home Screen name is **Hearts iPad**. Its service-worker scope and manifest start URL stay within `/hearts-ipad/`.
 
+The header, browser favicon, and Home Screen icon use the existing **Moonlight** artwork: a gold crescent and cream heart on blue. Shawn requested this correction on September 25, 2026. The source is option E in `../reviews/home-icons/`; the earlier Gold seal reference in the implementation brief records the prior design.
+
 - Game and backup keys: `codex-ipad-hearts-game-v2` and `codex-ipad-hearts-game-v2-backup`.
 - Preferences: `codex-ipad-hearts-settings-v2`.
-- Cache: `codex-ipad-hearts-v1`. Cleanup only removes older caches with this preview's prefix. Its prefix also avoids the original Hearts worker's cache cleanup.
+- Cache: `codex-ipad-hearts-v2`. Cleanup only removes older caches with this preview's prefix. Its prefix also avoids the original Hearts worker's cache cleanup.
 - The [implementation brief](IPAD-BUILD-PROMPT.md) records the design requirements and three Sol/xhigh agent assignments.
 
 Before this snapshot, the responsive source passed 239 tablet cases, 162 phone renders, rules, touch/confirmation, rotation, animation, and offline checks. The separate-release checks verify saving and offline-cache isolation plus portrait, landscape, and phone layout smoke tests. They use desktop WebKit and Chrome; they are not physical iPad tests.
